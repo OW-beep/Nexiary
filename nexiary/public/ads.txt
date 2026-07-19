@@ -1,0 +1,2 @@
+# AdSense審査申請・通過後、Google Adsenseの管理画面に表示される正式な内容に置き換えてください
+# 例: google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0

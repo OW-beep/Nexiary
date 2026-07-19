@@ -1,0 +1,102 @@
+---
+title: "古い写真・低画質画像を拡大すると粗くなる人へ｜AI高画質化で画質はどこまで復元できるか"
+description: "画像を拡大すると輪郭がぼやける理由を解説しながら、AIで画像を高画質化する「Aiarty Image Enhancer」を紹介します。"
+date: "2026-07-16"
+category: "ai"
+tags: ["画像高画質化", "Aiarty", "AIツール", "在宅ワーク"]
+floatingAd:
+  name: "Aiarty Image Enhancer"
+  description: "画像高画質化AIツール"
+  href: "https://px.a8.net/svt/ejp?a8mat=4B81T5+DZ3AYA+428G+HVV0H"
+  cta: "詳細を見る"
+---
+
+<p className="not-prose text-xs italic text-ink-soft/70">※本記事にはアフィリエイト広告を含みます。</p>
+
+ブログのアイキャッチに使いたい写真が低解像度だった、古いデジカメの写真を大きく印刷したら画質が粗くて残念な仕上がりになった——画像を拡大するとどうしても輪郭がぼやけてしまう、という経験は多くの人にあるはずです。
+
+## なぜ画像を拡大すると粗くなるのか
+
+デジタル画像は、色のついた点（ピクセル）の集まりでできています。従来の拡大方法は、足りないピクセルを周囲の色から単純に計算して埋める「補間」という処理が中心でした。この方法は仕組みがシンプルな分、輪郭がぼやけたり、輪郭部分がギザギザに見えたりしやすいという弱点があります。
+
+<UpscaleDiagram />
+
+一方、近年広がっているAIによる超解像技術は、単純な補間ではなく、大量の画像から学習したパターンをもとに「本来どんな模様だったか」を推測しながらピクセルを描き足す仕組みです。輪郭や質感を推測して再構築するため、従来の拡大方法よりも自然な仕上がりになりやすいとされています。
+
+## Aiarty Image Enhancerという選択肢
+
+「Aiarty Image Enhancer」は、成都Digiarty Software社が開発する画像高画質化ソフトです。ぼかし補正・ノイズ除去・ロスレス拡大・顔のレタッチ・色補正などをワンクリックで行えるのが特徴で、処理はローカルのPC上で完結するため、画像データを外部サーバーにアップロードせずに済みます。
+
+<div className="not-prose my-8 flex justify-center">
+  <a href="https://px.a8.net/svt/ejp?a8mat=4B81T5+DZ3AYA+428G+HVV0H" rel="nofollow">
+    <img border="0" width="300" height="250" alt="Aiarty Image Enhancer 画像高画質化AIツール" src="https://www25.a8.net/svt/bgt?aid=260716073845&wid=001&eno=01&mid=s00000018952003004000&mc=1" />
+  </a>
+  <img border="0" width="1" height="1" src="https://www16.a8.net/0.gif?a8mat=4B81T5+DZ3AYA+428G+HVV0H" alt="" />
+</div>
+
+用途に応じて複数のAIモデルを使い分けられるのも特徴です。人物・風景・イラストなど幅広い被写体に対応するモデルのほか、AIが生成した画像特有のノイズを整えるモデル、撮影時のピンボケやノイズを補正するモデルなど、画像の種類ごとに最適化された処理を選べます。低解像度の画像であれば、最大8倍程度まで画質を保ったまま拡大することも可能とされています。
+
+<SpecBarChart
+  title="拡大倍率の目安"
+  items={[
+    { label: "従来の単純拡大で粗さが目立ちやすい倍率", value: 2, max: 8, unit: "倍" },
+    { label: "Aiarty Image Enhancerが対応する倍率の目安", value: 8, max: 8, unit: "倍", highlight: true },
+  ]}
+  note="※実際の仕上がりは元画像の状態やPCのスペックによって変わります。"
+/>
+
+## 気になる点
+
+- 高解像度への拡大や大量の一括処理には、それなりのPCスペック（GPU推奨）が必要で、非力なPCでは処理に時間がかかる
+- 極端にピントが外れた画像や、被写体が小さすぎて潰れている画像は、AIでも復元しきれないことがある
+- 無料プランは処理枚数や書き出しに制限があり、本格的に使うには有料プランの検討が必要
+
+「なんでも綺麗になる魔法のツール」ではなく、あくまで元画像にある情報を推測して補う技術なので、過度な期待は禁物です。
+
+## 従来の画像編集ソフトとの違い
+
+<TwoColumnCompare
+  columns={[
+    {
+      title: "従来の画像編集ソフト",
+      items: [
+        "拡大は補間処理が中心",
+        "ノイズ除去やシャープ化は手動調整が必要",
+        "操作に一定の知識が必要",
+      ],
+    },
+    {
+      title: "Aiarty Image Enhancer",
+      items: [
+        "AIが輪郭・質感を推測して補完",
+        "ノイズ除去・拡大をワンクリックで処理",
+        "処理はローカルPC上で完結",
+      ],
+      highlight: true,
+    },
+  ]}
+/>
+
+## こんな人におすすめ
+
+- ブログやSNS用に、低解像度の画像を大きく使いたい人
+- 古い写真をきれいな状態で残しておきたい人
+- AIで生成したイラストの粗さが気になっている人
+
+## まとめ
+
+画像の粗さは「解像度が足りないから仕方ない」と諦めがちですが、AIによる高画質化技術を使えば、ある程度まで補うことができます。
+
+補間による拡大とAI超解像の違いは、地図で例えるなら「空白部分を均等に塗りつぶす」のと「周辺の地形から推測して描き足す」くらいの差があります。印刷用の画像や思い出の写真など、ここぞという場面で試してみる価値があります。
+
+### 参考資料
+
+- Aiarty Image Enhancer公式サイト（Chengdu Digiarty Software, Inc.）
+- 画像超解像技術に関する一般的な技術解説
+
+<div className="not-prose my-8 flex justify-center">
+  <a href="https://px.a8.net/svt/ejp?a8mat=4B81T5+DZ3AYA+428G+HVV0H" rel="nofollow">
+    <img border="0" width="300" height="250" alt="Aiarty Image Enhancer 画像高画質化AIツール" src="https://www25.a8.net/svt/bgt?aid=260716073845&wid=001&eno=01&mid=s00000018952003004000&mc=1" />
+  </a>
+  <img border="0" width="1" height="1" src="https://www16.a8.net/0.gif?a8mat=4B81T5+DZ3AYA+428G+HVV0H" alt="Aiarty Image Enhancer 画像高画質化AIツール" />
+</div>

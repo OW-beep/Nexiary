@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-paper text-ink font-body antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-display text-ink;
+  }
+  a {
+    @apply underline-offset-4;
+  }
+  :focus-visible {
+    outline: 2px solid theme("colors.stamp.DEFAULT");
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* 図書館の目録カード風コンポーネント基盤 */
+  .catalog-card {
+    @apply relative bg-paper-card border border-line rounded-card;
+  }
+  .catalog-card::before {
+    content: "";
+    @apply absolute top-0 left-4 w-6 h-2 bg-line/60;
+  }
+  .index-tab {
+    @apply inline-flex items-center gap-1 font-mono text-xs tracking-wide uppercase text-moss bg-moss-light px-2 py-0.5 rounded-card;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
