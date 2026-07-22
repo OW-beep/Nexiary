@@ -4,7 +4,7 @@ export const siteConfig = {
   description:
     "AI・ゲーム・ガジェット・Webサービスの最新情報を、目録のように整理してお届けするメディア「Nexiary」。",
   // 本番ドメインが決まり次第ここを更新（メタデータのcanonical/OGPに反映される）
-  url: "https://nexiary.example.com",
+  url: "https://nexiary-phi.vercel.app",
   locale: "ja_JP",
   twitterHandle: "@nexiary_media",
   categories: [
