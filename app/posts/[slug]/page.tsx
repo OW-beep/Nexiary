@@ -40,6 +40,9 @@ import PhotocatalystDiagram from "@/components/mdx/PhotocatalystDiagram";
 import VirtualizationDiagram from "@/components/mdx/VirtualizationDiagram";
 import ReviewTrustDiagram from "@/components/mdx/ReviewTrustDiagram";
 import EsimSetupFlowDiagram from "@/components/mdx/EsimSetupFlowDiagram";
+import PcCollectionFlowDiagram from "@/components/mdx/PcCollectionFlowDiagram";
+import TapeToDigitalDiagram from "@/components/mdx/TapeToDigitalDiagram";
+import SpaceBookingFlowDiagram from "@/components/mdx/SpaceBookingFlowDiagram";
 import { siteConfig } from "@/lib/site-config";
 import { getAllPosts, getPostBySlug, getRelatedPosts } from "@/lib/posts";
 
@@ -77,6 +80,9 @@ const mdxComponents = {
   VirtualizationDiagram,
   ReviewTrustDiagram,
   EsimSetupFlowDiagram,
+  PcCollectionFlowDiagram,
+  TapeToDigitalDiagram,
+  SpaceBookingFlowDiagram,
 };
 
 export function generateStaticParams() {
