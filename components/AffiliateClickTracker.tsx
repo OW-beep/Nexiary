@@ -20,7 +20,11 @@ export default function AffiliateClickTracker() {
       if (!target) return;
       const href = target.getAttribute("href") || "";
       const rel = target.getAttribute("rel") || "";
-      const isAffiliate = href.includes("a8.net") || rel.includes("sponsored");
+      const isAffiliate =
+        href.includes("a8.net") ||
+        href.includes("rakuten.co.jp") ||
+        href.includes("hb.afl.rakuten.co.jp") ||
+        rel.includes("sponsored");
       if (!isAffiliate || !window.gtag) return;
 
       window.gtag("event", "affiliate_click", {

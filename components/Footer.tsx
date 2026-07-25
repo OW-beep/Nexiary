@@ -4,6 +4,7 @@ import { siteConfig } from "@/lib/site-config";
 
 const footerLinks = [
   { href: "/about", label: "About" },
+  { href: "/log", label: "館内日誌" },
   { href: "/contact", label: "お問い合わせ" },
   { href: "/privacy-policy", label: "プライバシーポリシー" },
   { href: "/terms", label: "利用規約" },

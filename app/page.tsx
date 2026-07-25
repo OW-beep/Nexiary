@@ -2,11 +2,20 @@ import Link from "next/link";
 import Container from "@/components/Container";
 import PostCard from "@/components/PostCard";
 import PopularPosts from "@/components/PopularPosts";
+import RandomCardDraw from "@/components/RandomCardDraw";
 import { siteConfig } from "@/lib/site-config";
 import { getAllPosts } from "@/lib/posts";
 
 export default function HomePage() {
-  const latest = getAllPosts().slice(0, 6);
+  const allPosts = getAllPosts();
+  const latest = allPosts.slice(0, 6);
+  const drawablePosts = allPosts.map((p) => ({
+    slug: p.slug,
+    title: p.frontmatter.title,
+    categoryLabel:
+      siteConfig.categories.find((c) => c.slug === p.frontmatter.category)?.label ??
+      p.frontmatter.category,
+  }));
   const today = new Date().toLocaleDateString("ja-JP", {
     year: "numeric",
     month: "2-digit",
@@ -46,6 +55,9 @@ export default function HomePage() {
               <span className="index-tab">特集</span>
               テーマ別まとめガイドを見る ↓
             </Link>
+            <div className="mt-6">
+              <RandomCardDraw posts={drawablePosts} />
+            </div>
           </div>
 
           {/* 受付印カード：訪問者が最初に目にする"目録カード"のビジュアル */}

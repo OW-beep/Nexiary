@@ -5,6 +5,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AffiliateClickTracker from "@/components/AffiliateClickTracker";
+import RakutenCorner from "@/components/RakutenCorner";
 import { siteConfig } from "@/lib/site-config";
 
 // display: 見出し用セリフ（日記/目録のクラシックな雰囲気）
@@ -117,6 +118,7 @@ export default function RootLayout({
         <main className="flex-1">{children}</main>
         <Footer />
         <AffiliateClickTracker />
+        <RakutenCorner />
       </body>
     </html>
   );

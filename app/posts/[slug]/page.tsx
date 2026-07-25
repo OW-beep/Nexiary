@@ -7,6 +7,7 @@ import PostCard from "@/components/PostCard";
 import AdSlot from "@/components/AdSlot";
 import AffiliateCard from "@/components/AffiliateCard";
 import FloatingAffiliateBar from "@/components/FloatingAffiliateBar";
+import ReadingPulse from "@/components/ReadingPulse";
 import FaqSection from "@/components/FaqSection";
 import RankingList from "@/components/mdx/RankingList";
 import AncWaveDiagram from "@/components/mdx/AncWaveDiagram";
@@ -196,6 +197,10 @@ export default function PostPage({ params }: { params: { slug: string } }) {
               </a>
             ))}
           </div>
+        </div>
+
+        <div className="mt-3">
+          <ReadingPulse slug={post.slug} />
         </div>
 
         <div className="prose prose-neutral mt-8 max-w-none prose-headings:font-display prose-headings:text-ink prose-a:text-stamp prose-img:rounded-card">
