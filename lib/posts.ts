@@ -25,11 +25,15 @@ function readPost(slug: string): Post {
 }
 
 // 本番公開用：draft記事とタイムゾーン考慮の未来日付を除外し、新着順に並べる
+// 日付は「日本時間のその日の0時」を基準に判定する。
+// （UTC基準のままだと、日本ではもう当日なのにVercelのビルド時刻（UTC）的にはまだ前日、
+// 　という理由で一覧・トップページにだけ反映されない現象が起きるため。個別ページ側は
+// 　この判定を持たないため先に見えてしまい、症状が分かりにくくなる原因になっていた）
 export function getAllPosts(): Post[] {
   const now = Date.now();
   return readSlugs()
     .map(readPost)
-    .filter((p) => !p.frontmatter.draft && new Date(p.frontmatter.date).getTime() <= now)
+    .filter((p) => !p.frontmatter.draft && new Date(`${p.frontmatter.date}T00:00:00+09:00`).getTime() <= now)
     .sort(
       (a, b) =>
         new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime()
