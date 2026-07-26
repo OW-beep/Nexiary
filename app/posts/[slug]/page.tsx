@@ -47,6 +47,7 @@ import SpaceBookingFlowDiagram from "@/components/mdx/SpaceBookingFlowDiagram";
 import SleepPressureDiagram from "@/components/mdx/SleepPressureDiagram";
 import BatteryChargeCountDiagram from "@/components/mdx/BatteryChargeCountDiagram";
 import DeviceSizeCompareDiagram from "@/components/mdx/DeviceSizeCompareDiagram";
+import MonitorArmSetupDiagram from "@/components/mdx/MonitorArmSetupDiagram";
 import { siteConfig } from "@/lib/site-config";
 import { getAllPosts, getPostBySlug, getRelatedPosts } from "@/lib/posts";
 
@@ -90,6 +91,7 @@ const mdxComponents = {
   SleepPressureDiagram,
   BatteryChargeCountDiagram,
   DeviceSizeCompareDiagram,
+  MonitorArmSetupDiagram,
 };
 
 export function generateStaticParams() {
