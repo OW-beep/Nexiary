@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   const stats = await getReadingStats(slug);
   if (!stats) {
     // 未接続の場合は「無効」を明示して返す。フロント側はこれを見て何も表示しない。
-    return NextResponse.json({ ok: true, enabled: false, views: null, active: 0 });
+    return NextResponse.json({ ok: true, enabled: false, views: null });
   }
   return NextResponse.json({ ok: true, enabled: true, ...stats });
 }
