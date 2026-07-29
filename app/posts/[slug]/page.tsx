@@ -52,6 +52,7 @@ import CoolingPadEffectDiagram from "@/components/mdx/CoolingPadEffectDiagram";
 import SmartPlugScheduleDiagram from "@/components/mdx/SmartPlugScheduleDiagram";
 import DeskLightAngleDiagram from "@/components/mdx/DeskLightAngleDiagram";
 import MultiDeviceChargeDiagram from "@/components/mdx/MultiDeviceChargeDiagram";
+import RetroCartCompatGauge from "@/components/mdx/RetroCartCompatGauge";
 import { siteConfig } from "@/lib/site-config";
 import { getAllPosts, getPostBySlug, getRelatedPosts } from "@/lib/posts";
 
@@ -100,6 +101,7 @@ const mdxComponents = {
   SmartPlugScheduleDiagram,
   DeskLightAngleDiagram,
   MultiDeviceChargeDiagram,
+  RetroCartCompatGauge,
 };
 
 export function generateStaticParams() {
