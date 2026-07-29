@@ -50,6 +50,8 @@ import DeviceSizeCompareDiagram from "@/components/mdx/DeviceSizeCompareDiagram"
 import MonitorArmSetupDiagram from "@/components/mdx/MonitorArmSetupDiagram";
 import CoolingPadEffectDiagram from "@/components/mdx/CoolingPadEffectDiagram";
 import SmartPlugScheduleDiagram from "@/components/mdx/SmartPlugScheduleDiagram";
+import DeskLightAngleDiagram from "@/components/mdx/DeskLightAngleDiagram";
+import MultiDeviceChargeDiagram from "@/components/mdx/MultiDeviceChargeDiagram";
 import { siteConfig } from "@/lib/site-config";
 import { getAllPosts, getPostBySlug, getRelatedPosts } from "@/lib/posts";
 
@@ -96,6 +98,8 @@ const mdxComponents = {
   MonitorArmSetupDiagram,
   CoolingPadEffectDiagram,
   SmartPlugScheduleDiagram,
+  DeskLightAngleDiagram,
+  MultiDeviceChargeDiagram,
 };
 
 export function generateStaticParams() {
