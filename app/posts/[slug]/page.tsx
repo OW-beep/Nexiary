@@ -53,6 +53,8 @@ import SmartPlugScheduleDiagram from "@/components/mdx/SmartPlugScheduleDiagram"
 import DeskLightAngleDiagram from "@/components/mdx/DeskLightAngleDiagram";
 import MultiDeviceChargeDiagram from "@/components/mdx/MultiDeviceChargeDiagram";
 import RetroCartCompatGauge from "@/components/mdx/RetroCartCompatGauge";
+import KeyboardLayoutDiffDiagram from "@/components/mdx/KeyboardLayoutDiffDiagram";
+import PencilTipSwapDiagram from "@/components/mdx/PencilTipSwapDiagram";
 import { siteConfig } from "@/lib/site-config";
 import { getAllPosts, getPostBySlug, getRelatedPosts } from "@/lib/posts";
 
@@ -102,6 +104,8 @@ const mdxComponents = {
   DeskLightAngleDiagram,
   MultiDeviceChargeDiagram,
   RetroCartCompatGauge,
+  KeyboardLayoutDiffDiagram,
+  PencilTipSwapDiagram,
 };
 
 export function generateStaticParams() {
