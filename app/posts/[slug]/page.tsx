@@ -57,6 +57,8 @@ import KeyboardLayoutDiffDiagram from "@/components/mdx/KeyboardLayoutDiffDiagra
 import PencilTipSwapDiagram from "@/components/mdx/PencilTipSwapDiagram";
 import SingleCableSetupDiagram from "@/components/mdx/SingleCableSetupDiagram";
 import MultiFunctionClusterDiagram from "@/components/mdx/MultiFunctionClusterDiagram";
+import FaceCushionMaterialDiagram from "@/components/mdx/FaceCushionMaterialDiagram";
+import VoiceCommandBubbles from "@/components/mdx/VoiceCommandBubbles";
 import { siteConfig } from "@/lib/site-config";
 import { getAllPosts, getPostBySlug, getRelatedPosts } from "@/lib/posts";
 
@@ -110,6 +112,8 @@ const mdxComponents = {
   PencilTipSwapDiagram,
   SingleCableSetupDiagram,
   MultiFunctionClusterDiagram,
+  FaceCushionMaterialDiagram,
+  VoiceCommandBubbles,
 };
 
 export function generateStaticParams() {
