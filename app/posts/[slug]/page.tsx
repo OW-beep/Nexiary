@@ -60,6 +60,7 @@ import MultiFunctionClusterDiagram from "@/components/mdx/MultiFunctionClusterDi
 import FaceCushionMaterialDiagram from "@/components/mdx/FaceCushionMaterialDiagram";
 import VoiceCommandBubbles from "@/components/mdx/VoiceCommandBubbles";
 import TVUpgradeDiagram from "@/components/mdx/TVUpgradeDiagram";
+import MaintenanceCycleDiagram from "@/components/mdx/MaintenanceCycleDiagram";
 import { siteConfig } from "@/lib/site-config";
 import { getAllPosts, getPostBySlug, getRelatedPosts } from "@/lib/posts";
 
@@ -116,6 +117,7 @@ const mdxComponents = {
   FaceCushionMaterialDiagram,
   VoiceCommandBubbles,
   TVUpgradeDiagram,
+  MaintenanceCycleDiagram,
 };
 
 export function generateStaticParams() {
