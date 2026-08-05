@@ -61,6 +61,8 @@ import FaceCushionMaterialDiagram from "@/components/mdx/FaceCushionMaterialDiag
 import VoiceCommandBubbles from "@/components/mdx/VoiceCommandBubbles";
 import TVUpgradeDiagram from "@/components/mdx/TVUpgradeDiagram";
 import MaintenanceCycleDiagram from "@/components/mdx/MaintenanceCycleDiagram";
+import LanternGlowDiagram from "@/components/mdx/LanternGlowDiagram";
+import SolarOutputWeatherDiagram from "@/components/mdx/SolarOutputWeatherDiagram";
 import { siteConfig } from "@/lib/site-config";
 import { getAllPosts, getPostBySlug, getRelatedPosts } from "@/lib/posts";
 
@@ -118,6 +120,8 @@ const mdxComponents = {
   VoiceCommandBubbles,
   TVUpgradeDiagram,
   MaintenanceCycleDiagram,
+  LanternGlowDiagram,
+  SolarOutputWeatherDiagram,
 };
 
 export function generateStaticParams() {
