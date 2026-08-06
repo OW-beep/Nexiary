@@ -63,6 +63,7 @@ import TVUpgradeDiagram from "@/components/mdx/TVUpgradeDiagram";
 import MaintenanceCycleDiagram from "@/components/mdx/MaintenanceCycleDiagram";
 import LanternGlowDiagram from "@/components/mdx/LanternGlowDiagram";
 import SolarOutputWeatherDiagram from "@/components/mdx/SolarOutputWeatherDiagram";
+import DisasterKitCategoryGrid from "@/components/mdx/DisasterKitCategoryGrid";
 import { siteConfig } from "@/lib/site-config";
 import { getAllPosts, getPostBySlug, getRelatedPosts } from "@/lib/posts";
 
@@ -122,6 +123,7 @@ const mdxComponents = {
   MaintenanceCycleDiagram,
   LanternGlowDiagram,
   SolarOutputWeatherDiagram,
+  DisasterKitCategoryGrid,
 };
 
 export function generateStaticParams() {
