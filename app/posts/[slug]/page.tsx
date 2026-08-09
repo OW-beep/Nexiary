@@ -9,6 +9,8 @@ import AffiliateCard from "@/components/AffiliateCard";
 import FloatingAffiliateBar from "@/components/FloatingAffiliateBar";
 import ReadingPulse from "@/components/ReadingPulse";
 import FaqSection from "@/components/FaqSection";
+import NexiaryScoreCard from "@/components/NexiaryScoreCard";
+import AuthorBio from "@/components/AuthorBio";
 import RankingList from "@/components/mdx/RankingList";
 import AncWaveDiagram from "@/components/mdx/AncWaveDiagram";
 import SpecBarChart from "@/components/mdx/SpecBarChart";
@@ -197,6 +199,27 @@ export default function PostPage({ params }: { params: { slug: string } }) {
       }
     : null;
 
+  // Nexiary Score（frontmatter）が設定されている記事はReviewの構造化データも出す。
+  // ratingValueはNexiary Scoreの合計をそのまま100点満点で使う（星5段階への変換はしない）。
+  const reviewJsonLd = post.frontmatter.nexiaryScore
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Review",
+        itemReviewed: {
+          "@type": "Product",
+          name: post.frontmatter.reviewProduct ?? post.frontmatter.title,
+        },
+        reviewRating: {
+          "@type": "Rating",
+          ratingValue: post.frontmatter.nexiaryScore.total,
+          bestRating: 100,
+          worstRating: 0,
+        },
+        author: { "@type": "Organization", name: siteConfig.name },
+        datePublished: post.frontmatter.date,
+      }
+    : null;
+
   return (
     <Container className="py-12">
       <script
@@ -211,6 +234,12 @@ export default function PostPage({ params }: { params: { slug: string } }) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
+      )}
+      {reviewJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewJsonLd) }}
         />
       )}
       <Breadcrumbs
@@ -241,6 +270,10 @@ export default function PostPage({ params }: { params: { slug: string } }) {
           <ReadingPulse slug={post.slug} />
         </div>
 
+        {post.frontmatter.nexiaryScore && (
+          <NexiaryScoreCard score={post.frontmatter.nexiaryScore} />
+        )}
+
         <div className="prose prose-neutral mt-8 max-w-none prose-headings:font-display prose-headings:text-ink prose-a:text-stamp prose-img:rounded-card">
           <MDXRemote
             source={post.content}
@@ -255,6 +288,7 @@ export default function PostPage({ params }: { params: { slug: string } }) {
         </div>
 
         <AdSlot slot="1234567890" />
+        <AuthorBio />
       </article>
 
       {related.length > 0 && (

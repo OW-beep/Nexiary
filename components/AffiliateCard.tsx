@@ -19,7 +19,7 @@ export default function AffiliateCard({
   description,
   href,
   image,
-  cta = "楽天市場で見る",
+  cta = "価格を確認する",
   price,
   badge,
 }: AffiliateCardProps) {

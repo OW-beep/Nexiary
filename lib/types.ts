@@ -16,6 +16,17 @@ export interface PostFrontmatter {
     cta?: string;
   };
   faq?: { q: string; a: string }[];
+  // Nexiary Score：編集部の主観評価（実測値ではない）。合計は100点満点、内訳は各20点満点。
+  // ここに設定すると記事にスコアカードが表示され、Reviewの構造化データ（ratingValue）にも使われる。
+  nexiaryScore?: {
+    total: number; // 0-100
+    price: number; // 価格 0-20
+    performance: number; // 性能 0-20
+    usability: number; // 使いやすさ 0-20
+    value: number; // コスパ 0-20
+    uniqueness: number; // 独自性 0-20
+  };
+  reviewProduct?: string; // Reviewスキーマのitem名。未設定ならtitleを使う
 }
 
 export interface Post {
