@@ -58,6 +58,8 @@ import RetroCartCompatGauge from "@/components/mdx/RetroCartCompatGauge";
 import KeyboardLayoutDiffDiagram from "@/components/mdx/KeyboardLayoutDiffDiagram";
 import PencilTipSwapDiagram from "@/components/mdx/PencilTipSwapDiagram";
 import SingleCableSetupDiagram from "@/components/mdx/SingleCableSetupDiagram";
+import CleaningToolUsesDiagram from "@/components/mdx/CleaningToolUsesDiagram";
+import MouseSoleWearDiagram from "@/components/mdx/MouseSoleWearDiagram";
 import MultiFunctionClusterDiagram from "@/components/mdx/MultiFunctionClusterDiagram";
 import FaceCushionMaterialDiagram from "@/components/mdx/FaceCushionMaterialDiagram";
 import VoiceCommandBubbles from "@/components/mdx/VoiceCommandBubbles";
@@ -126,6 +128,8 @@ const mdxComponents = {
   LanternGlowDiagram,
   SolarOutputWeatherDiagram,
   DisasterKitCategoryGrid,
+  CleaningToolUsesDiagram,
+  MouseSoleWearDiagram,
 };
 
 export function generateStaticParams() {
