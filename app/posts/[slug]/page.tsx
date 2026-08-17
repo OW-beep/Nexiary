@@ -62,6 +62,8 @@ import CleaningToolUsesDiagram from "@/components/mdx/CleaningToolUsesDiagram";
 import MouseSoleWearDiagram from "@/components/mdx/MouseSoleWearDiagram";
 import DeskHeightSwitchDiagram from "@/components/mdx/DeskHeightSwitchDiagram";
 import IntensityScaleDiagram from "@/components/mdx/IntensityScaleDiagram";
+import HumidifyRangeDiagram from "@/components/mdx/HumidifyRangeDiagram";
+import KnuckleStrapDiagram from "@/components/mdx/KnuckleStrapDiagram";
 import MultiFunctionClusterDiagram from "@/components/mdx/MultiFunctionClusterDiagram";
 import FaceCushionMaterialDiagram from "@/components/mdx/FaceCushionMaterialDiagram";
 import VoiceCommandBubbles from "@/components/mdx/VoiceCommandBubbles";
@@ -134,6 +136,8 @@ const mdxComponents = {
   MouseSoleWearDiagram,
   DeskHeightSwitchDiagram,
   IntensityScaleDiagram,
+  HumidifyRangeDiagram,
+  KnuckleStrapDiagram,
 };
 
 export function generateStaticParams() {
