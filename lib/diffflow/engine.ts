@@ -111,17 +111,30 @@ export function parseSheet(loaded: LoadedWorkbook, sheetName: string): ParsedTab
   return { fileName: loaded.fileName, sheetName, columns, headers, rows };
 }
 
-/** 列名から、その表におけるExcel列アルファベットを引く */
-function letterOf(table: ParsedTable, name: string): string {
-  return table.columns.find((c) => c.name === name)?.letter ?? "?";
+/** 列名から、その表におけるExcel列アルファベットを引く(存在しなければnull) */
+function letterOf(table: ParsedTable, name: string): string | null {
+  return table.columns.find((c) => c.name === name)?.letter ?? null;
 }
 
-/** 列名を「見出しテキスト (列アルファベット)」の表示用ラベルにする。旧新で位置が違う場合は両方表示する */
+/** 列名を「見出しテキスト (列アルファベット)」の表示用ラベルにする。旧新で位置が違う/片方にしかない場合はその旨を表示する */
 export function columnLabel(oldTable: ParsedTable, newTable: ParsedTable, name: string): string {
-  const oldLetter = letterOf(oldTable, name);
-  const newLetter = letterOf(newTable, name);
+  const oldLetter = letterOf(oldTable, name) ?? "―";
+  const newLetter = letterOf(newTable, name) ?? "―";
   if (oldLetter === newLetter) return `${name} (${newLetter})`;
   return `${name} (旧${oldLetter}/新${newLetter})`;
+}
+
+/** 2ファイルの列を合わせた一覧(和集合)を、旧ファイルの並び→新ファイルのみの列の順で返す */
+export function unionColumns(oldTable: ParsedTable, newTable: ParsedTable): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  [...oldTable.headers, ...newTable.headers].forEach((h) => {
+    if (!seen.has(h)) {
+      seen.add(h);
+      result.push(h);
+    }
+  });
+  return result;
 }
 
 /** 2ファイルの列構成(見出し行)そのものを比較する */
@@ -160,8 +173,10 @@ export function diffTables(
   keyColumns: string[],
   ignoreColumns: string[]
 ): DiffResult {
-  const compareColumns = oldTable.headers.filter(
-    (h) => !keyColumns.includes(h) && !ignoreColumns.includes(h) && newTable.headers.includes(h)
+  // 比較対象は「両ファイルの列の和集合」から、キー・除外を除いたもの。
+  // 片方のファイルにしかない列も、無視されずに比較対象として選べる(存在しない側は空欄として扱う)。
+  const compareColumns = unionColumns(oldTable, newTable).filter(
+    (h) => !keyColumns.includes(h) && !ignoreColumns.includes(h)
   );
 
   const oldByKey = new Map<string, ParsedRow>();
@@ -196,7 +211,8 @@ export function diffTables(
       if (before !== after) {
         const risky = isRiskyChange(before, after);
         if (risky) riskyCount += 1;
-        changes.push({ column: col, columnLetter: letterOf(newTable, col), before, after, risky });
+        const columnLetter = letterOf(newTable, col) ?? letterOf(oldTable, col) ?? "?";
+        changes.push({ column: col, columnLetter, before, after, risky });
       }
     });
     if (changes.length > 0) {

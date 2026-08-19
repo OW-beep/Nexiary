@@ -9,6 +9,7 @@ import {
   diffTables,
   diffHeaders,
   columnLabel,
+  unionColumns,
   buildDiffWorkbook,
   getFreeRowLimit,
   type LoadedWorkbook,
@@ -42,6 +43,10 @@ export default function DiffFlowApp() {
   }, [oldTable, newTable]);
 
   const sharedHeaders = headerDiff?.common ?? [];
+  const allHeaders = useMemo(() => {
+    if (!oldTable || !newTable) return [];
+    return unionColumns(oldTable, newTable);
+  }, [oldTable, newTable]);
 
   function tryApplyTable(which: "old" | "new", loaded: LoadedWorkbook, sheetName: string) {
     const table = parseSheet(loaded, sheetName);
@@ -202,7 +207,7 @@ export default function DiffFlowApp() {
           <div>
             <span className="index-tab">比較キー(複数選択可)</span>
             <p className="mt-2 font-body text-xs text-ink-soft">
-              2つのファイルで同じ行を突き合わせる列を選んでください。複数選ぶと「都道府県+顧客ID」のような複合キーで突き合わせます。
+              2つのファイルで同じ行を突き合わせる列を選んでください。複数選ぶと「都道府県+顧客ID」のような複合キーで突き合わせます。(キーは両ファイルに存在する列のみ選べます)
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
               {sharedHeaders.map((h) => {
@@ -228,10 +233,10 @@ export default function DiffFlowApp() {
             <div>
               <span className="index-tab">比較から除外する列(任意)</span>
               <p className="mt-2 font-body text-xs text-ink-soft">
-                キー以外の共通列は、ここで外さない限りすべて同時に比較されます。
+                キー以外の列は、データがある列(片方のファイルにしかない列も含む)がすべて対象です。ここで外さない限り同時に比較されます。片方にしかない列は、値がない側を空欄として比較します。
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
-                {sharedHeaders
+                {allHeaders
                   .filter((h) => !keyColumns.includes(h))
                   .map((h) => {
                     const active = ignoreColumns.includes(h);
