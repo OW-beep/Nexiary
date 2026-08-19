@@ -1,13 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AlertTriangle, Download, Minus, Plus, RotateCcw, Pencil } from "lucide-react";
+import { AlertTriangle, Download, Minus, Plus, RotateCcw, Pencil, ArrowRightLeft } from "lucide-react";
 import FileDropZone from "./FileDropZone";
 import {
-  parseFile,
+  loadWorkbook,
+  parseSheet,
   diffTables,
+  diffHeaders,
   buildDiffWorkbook,
   getFreeRowLimit,
+  type LoadedWorkbook,
   type ParsedTable,
   type DiffResult,
 } from "@/lib/diffflow/engine";
@@ -17,9 +20,14 @@ const FREE_ROW_LIMIT = getFreeRowLimit();
 type Step = "upload" | "configure" | "result";
 
 export default function DiffFlowApp() {
+  const [oldLoaded, setOldLoaded] = useState<LoadedWorkbook | null>(null);
+  const [newLoaded, setNewLoaded] = useState<LoadedWorkbook | null>(null);
+  const [oldSheet, setOldSheet] = useState<string | null>(null);
+  const [newSheet, setNewSheet] = useState<string | null>(null);
   const [oldTable, setOldTable] = useState<ParsedTable | null>(null);
   const [newTable, setNewTable] = useState<ParsedTable | null>(null);
-  const [keyColumn, setKeyColumn] = useState<string>("");
+
+  const [keyColumns, setKeyColumns] = useState<string[]>([]);
   const [ignoreColumns, setIgnoreColumns] = useState<string[]>([]);
   const [result, setResult] = useState<DiffResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -27,40 +35,67 @@ export default function DiffFlowApp() {
 
   const step: Step = result ? "result" : oldTable && newTable ? "configure" : "upload";
 
-  const sharedHeaders = useMemo(() => {
-    if (!oldTable || !newTable) return [];
-    return oldTable.headers.filter((h) => newTable.headers.includes(h));
+  const headerDiff = useMemo(() => {
+    if (!oldTable || !newTable) return null;
+    return diffHeaders(oldTable.headers, newTable.headers);
   }, [oldTable, newTable]);
+
+  const sharedHeaders = headerDiff?.common ?? [];
+
+  function tryApplyTable(which: "old" | "new", loaded: LoadedWorkbook, sheetName: string) {
+    const table = parseSheet(loaded, sheetName);
+    if (table.rows.length > FREE_ROW_LIMIT) {
+      setError(
+        `無料版は1ファイルあたり${FREE_ROW_LIMIT.toLocaleString()}行までです。「${loaded.fileName}」(${sheetName})は${table.rows.length.toLocaleString()}行あります。`
+      );
+      return;
+    }
+    setError(null);
+    if (which === "old") {
+      setOldSheet(sheetName);
+      setOldTable(table);
+    } else {
+      setNewSheet(sheetName);
+      setNewTable(table);
+    }
+    setResult(null);
+    setKeyColumns([]);
+    setIgnoreColumns([]);
+  }
 
   async function handleFile(which: "old" | "new", file: File) {
     setError(null);
     try {
-      const parsed = await parseFile(file);
-      if (parsed.rows.length > FREE_ROW_LIMIT) {
-        setError(
-          `無料版は1ファイルあたり${FREE_ROW_LIMIT.toLocaleString()}行までです。「${file.name}」は${parsed.rows.length.toLocaleString()}行あります。`
-        );
-        return;
-      }
+      const loaded = await loadWorkbook(file);
+      const firstSheet = loaded.sheetNames[0];
       if (which === "old") {
-        setOldTable(parsed);
+        setOldLoaded(loaded);
       } else {
-        setNewTable(parsed);
+        setNewLoaded(loaded);
       }
-      setResult(null);
-      setKeyColumn("");
-      setIgnoreColumns([]);
+      tryApplyTable(which, loaded, firstSheet);
     } catch (e) {
       setError("ファイルを読み込めませんでした。形式を確認してください。");
     }
   }
 
+  function handleSheetChange(which: "old" | "new", sheetName: string) {
+    const loaded = which === "old" ? oldLoaded : newLoaded;
+    if (!loaded) return;
+    tryApplyTable(which, loaded, sheetName);
+  }
+
+  function toggleKeyColumn(h: string) {
+    setKeyColumns((prev) => (prev.includes(h) ? prev.filter((c) => c !== h) : [...prev, h]));
+    setIgnoreColumns((prev) => prev.filter((c) => c !== h));
+  }
+
   function runCompare() {
-    if (!oldTable || !newTable || !keyColumn) return;
+    if (!oldTable || !newTable || keyColumns.length === 0) return;
     setBusy(true);
     // 大きめのファイルでもUIが固まって見えないよう1フレーム逃がす
     setTimeout(() => {
-      const diff = diffTables(oldTable, newTable, keyColumn, ignoreColumns);
+      const diff = diffTables(oldTable, newTable, keyColumns, ignoreColumns);
       setResult(diff);
       setBusy(false);
     }, 30);
@@ -78,9 +113,13 @@ export default function DiffFlowApp() {
   }
 
   function reset() {
+    setOldLoaded(null);
+    setNewLoaded(null);
+    setOldSheet(null);
+    setNewSheet(null);
     setOldTable(null);
     setNewTable(null);
-    setKeyColumn("");
+    setKeyColumns([]);
     setIgnoreColumns([]);
     setResult(null);
     setError(null);
@@ -88,19 +127,25 @@ export default function DiffFlowApp() {
 
   return (
     <div className="space-y-8">
-      {/* Step 1: ファイル投入 */}
+      {/* Step 1: ファイル投入(シート選択含む) */}
       <div className="grid gap-4 sm:grid-cols-2">
         <FileDropZone
           label="旧ファイル"
-          fileName={oldTable?.fileName ?? null}
+          fileName={oldLoaded?.fileName ?? null}
           rowCount={oldTable?.rows.length ?? null}
+          sheetNames={oldLoaded?.sheetNames ?? []}
+          selectedSheet={oldSheet}
           onFile={(f) => handleFile("old", f)}
+          onSheetChange={(s) => handleSheetChange("old", s)}
         />
         <FileDropZone
           label="新ファイル"
-          fileName={newTable?.fileName ?? null}
+          fileName={newLoaded?.fileName ?? null}
           rowCount={newTable?.rows.length ?? null}
+          sheetNames={newLoaded?.sheetNames ?? []}
+          selectedSheet={newSheet}
           onFile={(f) => handleFile("new", f)}
+          onSheetChange={(s) => handleSheetChange("new", s)}
         />
       </div>
 
@@ -111,34 +156,82 @@ export default function DiffFlowApp() {
         </p>
       )}
 
+      {/* Step 1.5: 列構成の差分(構造差分) */}
+      {headerDiff && (headerDiff.onlyOld.length > 0 || headerDiff.onlyNew.length > 0) && (
+        <div className="catalog-card space-y-3 p-5">
+          <span className="index-tab">
+            <ArrowRightLeft size={11} className="mr-1 inline" />
+            列構成の差分
+          </span>
+          <p className="font-body text-xs text-ink-soft">
+            2つのファイルで列の名前が異なっています。名称変更の可能性もあるので確認してください。
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {headerDiff.onlyOld.length > 0 && (
+              <div>
+                <p className="font-mono text-[11px] text-stamp">旧のみ(削除された列)</p>
+                <div className="mt-1 flex flex-wrap gap-1.5">
+                  {headerDiff.onlyOld.map((h) => (
+                    <span key={h} className="rounded-card border border-stamp/30 bg-stamp/5 px-2 py-0.5 font-mono text-xs text-stamp">
+                      {h}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {headerDiff.onlyNew.length > 0 && (
+              <div>
+                <p className="font-mono text-[11px] text-moss">新のみ(追加された列)</p>
+                <div className="mt-1 flex flex-wrap gap-1.5">
+                  {headerDiff.onlyNew.map((h) => (
+                    <span key={h} className="rounded-card border border-moss/40 bg-moss-light px-2 py-0.5 font-mono text-xs text-moss">
+                      {h}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Step 2: 比較条件 */}
       {step !== "upload" && oldTable && newTable && (
         <div className="catalog-card space-y-5 p-5">
           <div>
-            <span className="index-tab">比較キー</span>
+            <span className="index-tab">比較キー(複数選択可)</span>
             <p className="mt-2 font-body text-xs text-ink-soft">
-              2つのファイルで同じ行を突き合わせる列を選んでください(例：ID、顧客番号)
+              2つのファイルで同じ行を突き合わせる列を選んでください。複数選ぶと「都道府県+顧客ID」のような複合キーで突き合わせます。
             </p>
-            <select
-              value={keyColumn}
-              onChange={(e) => setKeyColumn(e.target.value)}
-              className="mt-2 w-full rounded-card border border-line bg-paper-card px-3 py-2 font-mono text-sm text-ink focus:border-stamp focus:outline-none"
-            >
-              <option value="">選択してください</option>
-              {sharedHeaders.map((h) => (
-                <option key={h} value={h}>
-                  {h}
-                </option>
-              ))}
-            </select>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {sharedHeaders.map((h) => {
+                const active = keyColumns.includes(h);
+                return (
+                  <button
+                    key={h}
+                    type="button"
+                    onClick={() => toggleKeyColumn(h)}
+                    className={
+                      "rounded-card border px-3 py-1 font-mono text-xs transition-colors " +
+                      (active ? "border-ink bg-ink text-paper" : "border-line text-ink-soft hover:border-ink-soft")
+                    }
+                  >
+                    {h}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {keyColumn && (
+          {keyColumns.length > 0 && (
             <div>
               <span className="index-tab">比較から除外する列(任意)</span>
+              <p className="mt-2 font-body text-xs text-ink-soft">
+                キー以外の共通列は、ここで外さない限りすべて同時に比較されます。
+              </p>
               <div className="mt-2 flex flex-wrap gap-2">
                 {sharedHeaders
-                  .filter((h) => h !== keyColumn)
+                  .filter((h) => !keyColumns.includes(h))
                   .map((h) => {
                     const active = ignoreColumns.includes(h);
                     return (
@@ -168,7 +261,7 @@ export default function DiffFlowApp() {
           <div className="flex flex-wrap items-center gap-3 pt-1">
             <button
               type="button"
-              disabled={!keyColumn || busy}
+              disabled={keyColumns.length === 0 || busy}
               onClick={runCompare}
               className="rounded-card bg-ink px-5 py-2 font-body text-sm text-paper transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
             >
@@ -199,6 +292,9 @@ export default function DiffFlowApp() {
                 <Download size={14} /> Excelで出力
               </button>
             </div>
+            <p className="mb-3 font-mono text-[11px] text-ink-soft/70">
+              比較キー: {result.keyColumns.join(" / ")} ／ 比較列: {result.comparedColumns.length}列を同時比較
+            </p>
             <dl className="grid grid-cols-2 gap-4 sm:grid-cols-5">
               <Stat label="追加" value={result.added.length} accent="moss" icon={<Plus size={14} />} />
               <Stat label="削除" value={result.removed.length} accent="stamp" icon={<Minus size={14} />} />
@@ -210,36 +306,42 @@ export default function DiffFlowApp() {
 
           {result.changed.length > 0 && (
             <ResultTable title={`変更 (${result.changed.length}件)`}>
-              <table className="w-full font-mono text-xs">
-                <thead>
-                  <tr className="border-b border-line text-left text-ink-soft">
-                    <th className="py-2 pr-3">{result.keyColumn}</th>
-                    <th className="py-2 pr-3">列</th>
-                    <th className="py-2 pr-3">変更前</th>
-                    <th className="py-2 pr-3">変更後</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.changed.slice(0, 200).flatMap((row) =>
-                    row.changes.map((c, i) => (
-                      <tr key={`${row.key}-${c.column}-${i}`} className="border-b border-line/60">
-                        <td className="py-1.5 pr-3 text-ink">{i === 0 ? row.key : ""}</td>
-                        <td className="py-1.5 pr-3 text-ink-soft">
-                          {c.column}
-                          {c.risky && (
-                            <AlertTriangle size={11} className="ml-1 inline text-stamp" />
+              <div className="space-y-3">
+                {result.changed.slice(0, 100).map((row, idx) => {
+                  const riskyInRow = row.changes.filter((c) => c.risky).length;
+                  return (
+                    <div key={`${row.keyLabel}-${idx}`} className="rounded-card border border-line/70 p-3">
+                      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                        <p className="font-mono text-xs font-medium text-ink">{row.keyLabel}</p>
+                        <p className="font-mono text-[11px] text-ink-soft">
+                          {row.changes.length}項目変更
+                          {riskyInRow > 0 && (
+                            <span className="ml-1.5 inline-flex items-center gap-0.5 text-stamp">
+                              <AlertTriangle size={11} /> 要確認{riskyInRow}件
+                            </span>
                           )}
-                        </td>
-                        <td className="py-1.5 pr-3 text-ink-soft line-through">{c.before || "(空欄)"}</td>
-                        <td className="py-1.5 pr-3 text-moss">{c.after || "(空欄)"}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-              {result.changed.length > 200 && (
+                        </p>
+                      </div>
+                      <ul className="mt-2 space-y-1 border-t border-line/60 pt-2">
+                        {row.changes.map((c, i) => (
+                          <li key={i} className="flex flex-wrap items-baseline gap-x-2 font-mono text-xs">
+                            <span className="w-28 shrink-0 text-ink-soft">
+                              {c.column}
+                              {c.risky && <AlertTriangle size={11} className="ml-1 inline text-stamp" />}
+                            </span>
+                            <span className="text-ink-soft line-through">{c.before || "(空欄)"}</span>
+                            <span className="text-ink-soft/60">→</span>
+                            <span className="text-moss">{c.after || "(空欄)"}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+              {result.changed.length > 100 && (
                 <p className="mt-3 font-body text-xs text-ink-soft">
-                  画面表示は200件までです。全件は「Excelで出力」からご確認ください。
+                  画面表示は100件までです。全件は「Excelで出力」からご確認ください。
                 </p>
               )}
             </ResultTable>
@@ -247,13 +349,13 @@ export default function DiffFlowApp() {
 
           {result.added.length > 0 && (
             <ResultTable title={`追加 (${result.added.length}件)`}>
-              <SimpleRowList rows={result.added} keyColumn={result.keyColumn} tone="moss" />
+              <SimpleRowList rows={result.added} keyColumns={result.keyColumns} tone="moss" />
             </ResultTable>
           )}
 
           {result.removed.length > 0 && (
             <ResultTable title={`削除 (${result.removed.length}件)`}>
-              <SimpleRowList rows={result.removed} keyColumn={result.keyColumn} tone="stamp" />
+              <SimpleRowList rows={result.removed} keyColumns={result.keyColumns} tone="stamp" />
             </ResultTable>
           )}
         </div>
@@ -307,11 +409,11 @@ function ResultTable({ title, children }: { title: string; children: React.React
 
 function SimpleRowList({
   rows,
-  keyColumn,
+  keyColumns,
   tone,
 }: {
   rows: Record<string, string>[];
-  keyColumn: string;
+  keyColumns: string[];
   tone: "moss" | "stamp";
 }) {
   const shown = rows.slice(0, 100);
@@ -326,7 +428,7 @@ function SimpleRowList({
               (tone === "moss" ? "border-moss/40 bg-moss-light text-moss" : "border-stamp/30 bg-stamp/5 text-stamp")
             }
           >
-            {r[keyColumn] || "(キーなし)"}
+            {keyColumns.map((k) => r[k] ?? "").join(" / ") || "(キーなし)"}
           </li>
         ))}
       </ul>
