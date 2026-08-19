@@ -38,6 +38,12 @@ export default function Header() {
           >
             すべて
           </Link>
+          <Link
+            href="/tools"
+            className="font-body text-sm text-ink-soft transition-colors hover:text-stamp"
+          >
+            ツール
+          </Link>
         </nav>
 
         <Link

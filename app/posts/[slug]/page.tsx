@@ -65,6 +65,7 @@ import IntensityScaleDiagram from "@/components/mdx/IntensityScaleDiagram";
 import HumidifyRangeDiagram from "@/components/mdx/HumidifyRangeDiagram";
 import KnuckleStrapDiagram from "@/components/mdx/KnuckleStrapDiagram";
 import MatCurlFlattenDiagram from "@/components/mdx/MatCurlFlattenDiagram";
+import SlimWatchProfileDiagram from "@/components/mdx/SlimWatchProfileDiagram";
 import MultiFunctionClusterDiagram from "@/components/mdx/MultiFunctionClusterDiagram";
 import FaceCushionMaterialDiagram from "@/components/mdx/FaceCushionMaterialDiagram";
 import VoiceCommandBubbles from "@/components/mdx/VoiceCommandBubbles";
@@ -140,6 +141,7 @@ const mdxComponents = {
   HumidifyRangeDiagram,
   KnuckleStrapDiagram,
   MatCurlFlattenDiagram,
+  SlimWatchProfileDiagram,
 };
 
 export function generateStaticParams() {
