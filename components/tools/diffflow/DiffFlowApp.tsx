@@ -8,6 +8,7 @@ import {
   parseSheet,
   diffTables,
   diffHeaders,
+  columnLabel,
   buildDiffWorkbook,
   getFreeRowLimit,
   type LoadedWorkbook,
@@ -37,7 +38,7 @@ export default function DiffFlowApp() {
 
   const headerDiff = useMemo(() => {
     if (!oldTable || !newTable) return null;
-    return diffHeaders(oldTable.headers, newTable.headers);
+    return diffHeaders(oldTable, newTable);
   }, [oldTable, newTable]);
 
   const sharedHeaders = headerDiff?.common ?? [];
@@ -173,7 +174,7 @@ export default function DiffFlowApp() {
                 <div className="mt-1 flex flex-wrap gap-1.5">
                   {headerDiff.onlyOld.map((h) => (
                     <span key={h} className="rounded-card border border-stamp/30 bg-stamp/5 px-2 py-0.5 font-mono text-xs text-stamp">
-                      {h}
+                      {h} ({oldTable!.columns.find((c) => c.name === h)?.letter})
                     </span>
                   ))}
                 </div>
@@ -185,7 +186,7 @@ export default function DiffFlowApp() {
                 <div className="mt-1 flex flex-wrap gap-1.5">
                   {headerDiff.onlyNew.map((h) => (
                     <span key={h} className="rounded-card border border-moss/40 bg-moss-light px-2 py-0.5 font-mono text-xs text-moss">
-                      {h}
+                      {h} ({newTable!.columns.find((c) => c.name === h)?.letter})
                     </span>
                   ))}
                 </div>
@@ -216,7 +217,7 @@ export default function DiffFlowApp() {
                       (active ? "border-ink bg-ink text-paper" : "border-line text-ink-soft hover:border-ink-soft")
                     }
                   >
-                    {h}
+                    {columnLabel(oldTable, newTable, h)}
                   </button>
                 );
               })}
@@ -250,7 +251,7 @@ export default function DiffFlowApp() {
                             : "border-moss/50 bg-moss-light text-moss")
                         }
                       >
-                        {h}
+                        {columnLabel(oldTable, newTable, h)}
                       </button>
                     );
                   })}
@@ -312,7 +313,12 @@ export default function DiffFlowApp() {
                   return (
                     <div key={`${row.keyLabel}-${idx}`} className="rounded-card border border-line/70 p-3">
                       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-                        <p className="font-mono text-xs font-medium text-ink">{row.keyLabel}</p>
+                        <p className="font-mono text-xs font-medium text-ink">
+                          {row.keyLabel}
+                          <span className="ml-2 font-normal text-ink-soft/70">
+                            (旧 行{row.oldRowNumber} → 新 行{row.newRowNumber})
+                          </span>
+                        </p>
                         <p className="font-mono text-[11px] text-ink-soft">
                           {row.changes.length}項目変更
                           {riskyInRow > 0 && (
@@ -325,8 +331,9 @@ export default function DiffFlowApp() {
                       <ul className="mt-2 space-y-1 border-t border-line/60 pt-2">
                         {row.changes.map((c, i) => (
                           <li key={i} className="flex flex-wrap items-baseline gap-x-2 font-mono text-xs">
-                            <span className="w-28 shrink-0 text-ink-soft">
-                              {c.column}
+                            <span className="w-36 shrink-0 text-ink-soft">
+                              {c.columnLetter}{row.newRowNumber}
+                              <span className="ml-1 text-ink-soft/70">({c.column})</span>
                               {c.risky && <AlertTriangle size={11} className="ml-1 inline text-stamp" />}
                             </span>
                             <span className="text-ink-soft line-through">{c.before || "(空欄)"}</span>
@@ -412,7 +419,7 @@ function SimpleRowList({
   keyColumns,
   tone,
 }: {
-  rows: Record<string, string>[];
+  rows: { rowNumber: number; values: Record<string, string> }[];
   keyColumns: string[];
   tone: "moss" | "stamp";
 }) {
@@ -428,7 +435,8 @@ function SimpleRowList({
               (tone === "moss" ? "border-moss/40 bg-moss-light text-moss" : "border-stamp/30 bg-stamp/5 text-stamp")
             }
           >
-            {keyColumns.map((k) => r[k] ?? "").join(" / ") || "(キーなし)"}
+            <span className="text-ink-soft/70">行{r.rowNumber}: </span>
+            {keyColumns.map((k) => r.values[k] ?? "").join(" / ") || "(キーなし)"}
           </li>
         ))}
       </ul>

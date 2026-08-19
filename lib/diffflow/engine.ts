@@ -1,10 +1,21 @@
 import * as XLSX from "xlsx";
 
+export type ColumnInfo = {
+  name: string;
+  letter: string; // Excelの列アルファベット(A, B, ... AA)
+};
+
+export type ParsedRow = {
+  rowNumber: number; // 実際のシート上の行番号(見出し行を1として、データは2行目から)
+  values: Record<string, string>;
+};
+
 export type ParsedTable = {
   fileName: string;
   sheetName: string;
+  columns: ColumnInfo[];
   headers: string[];
-  rows: Record<string, string>[];
+  rows: ParsedRow[];
 };
 
 export type LoadedWorkbook = {
@@ -15,6 +26,7 @@ export type LoadedWorkbook = {
 
 export type CellChange = {
   column: string;
+  columnLetter: string; // 変更後ファイル基準の列アルファベット
   before: string;
   after: string;
   risky: boolean; // 「値が消えた」等、要確認フラグ
@@ -22,8 +34,13 @@ export type CellChange = {
 
 export type ChangedRow = {
   keyLabel: string;
+  oldRowNumber: number;
+  newRowNumber: number;
   changes: CellChange[];
 };
+
+export type AddedRow = { rowNumber: number; values: Record<string, string> };
+export type RemovedRow = { rowNumber: number; values: Record<string, string> };
 
 export type HeaderDiff = {
   common: string[];
@@ -34,8 +51,8 @@ export type HeaderDiff = {
 export type DiffResult = {
   keyColumns: string[];
   comparedColumns: string[];
-  added: Record<string, string>[];
-  removed: Record<string, string>[];
+  added: AddedRow[];
+  removed: RemovedRow[];
   changed: ChangedRow[];
   unchangedCount: number;
   totalOld: number;
@@ -76,21 +93,41 @@ export function parseSheet(loaded: LoadedWorkbook, sheetName: string): ParsedTab
   });
 
   const headerRow = raw[0] ?? [];
-  const headers = headerRow.map((h, i) => (h && h.trim() ? h.trim() : `列${i + 1}`));
+  const columns: ColumnInfo[] = headerRow.map((h, i) => ({
+    name: h && h.trim() ? h.trim() : `列${i + 1}`,
+    letter: XLSX.utils.encode_col(i),
+  }));
+  const headers = columns.map((c) => c.name);
 
-  const rows: Record<string, string>[] = raw.slice(1).map((line) => {
-    const row: Record<string, string> = {};
-    headers.forEach((h, i) => {
-      row[h] = (line[i] ?? "").toString().trim();
+  // データは見出し行(スプレッドシート上は1行目)の次から。実際の行番号を保持しておく。
+  const rows: ParsedRow[] = raw.slice(1).map((line, idx) => {
+    const values: Record<string, string> = {};
+    columns.forEach((col, i) => {
+      values[col.name] = (line[i] ?? "").toString().trim();
     });
-    return row;
+    return { rowNumber: idx + 2, values };
   });
 
-  return { fileName: loaded.fileName, sheetName, headers, rows };
+  return { fileName: loaded.fileName, sheetName, columns, headers, rows };
+}
+
+/** 列名から、その表におけるExcel列アルファベットを引く */
+function letterOf(table: ParsedTable, name: string): string {
+  return table.columns.find((c) => c.name === name)?.letter ?? "?";
+}
+
+/** 列名を「見出しテキスト (列アルファベット)」の表示用ラベルにする。旧新で位置が違う場合は両方表示する */
+export function columnLabel(oldTable: ParsedTable, newTable: ParsedTable, name: string): string {
+  const oldLetter = letterOf(oldTable, name);
+  const newLetter = letterOf(newTable, name);
+  if (oldLetter === newLetter) return `${name} (${newLetter})`;
+  return `${name} (旧${oldLetter}/新${newLetter})`;
 }
 
 /** 2ファイルの列構成(見出し行)そのものを比較する */
-export function diffHeaders(oldHeaders: string[], newHeaders: string[]): HeaderDiff {
+export function diffHeaders(oldTable: ParsedTable, newTable: ParsedTable): HeaderDiff {
+  const oldHeaders = oldTable.headers;
+  const newHeaders = newTable.headers;
   return {
     common: oldHeaders.filter((h) => newHeaders.includes(h)),
     onlyOld: oldHeaders.filter((h) => !newHeaders.includes(h)),
@@ -109,12 +146,12 @@ function isRiskyChange(before: string, after: string): boolean {
   return false;
 }
 
-function buildKey(row: Record<string, string>, keyColumns: string[]): string {
-  return keyColumns.map((k) => row[k] ?? "").join(KEY_SEPARATOR);
+function buildKey(values: Record<string, string>, keyColumns: string[]): string {
+  return keyColumns.map((k) => values[k] ?? "").join(KEY_SEPARATOR);
 }
 
-function keyLabelOf(row: Record<string, string>, keyColumns: string[]): string {
-  return keyColumns.map((k) => row[k] ?? "").join(" / ");
+function keyLabelOf(values: Record<string, string>, keyColumns: string[]): string {
+  return keyColumns.map((k) => values[k] ?? "").join(" / ");
 }
 
 export function diffTables(
@@ -127,20 +164,20 @@ export function diffTables(
     (h) => !keyColumns.includes(h) && !ignoreColumns.includes(h) && newTable.headers.includes(h)
   );
 
-  const oldByKey = new Map<string, Record<string, string>>();
+  const oldByKey = new Map<string, ParsedRow>();
   oldTable.rows.forEach((r) => {
-    const k = buildKey(r, keyColumns);
+    const k = buildKey(r.values, keyColumns);
     if (k.replace(new RegExp(KEY_SEPARATOR, "g"), "")) oldByKey.set(k, r);
   });
 
-  const newByKey = new Map<string, Record<string, string>>();
+  const newByKey = new Map<string, ParsedRow>();
   newTable.rows.forEach((r) => {
-    const k = buildKey(r, keyColumns);
+    const k = buildKey(r.values, keyColumns);
     if (k.replace(new RegExp(KEY_SEPARATOR, "g"), "")) newByKey.set(k, r);
   });
 
-  const added: Record<string, string>[] = [];
-  const removed: Record<string, string>[] = [];
+  const added: AddedRow[] = [];
+  const removed: RemovedRow[] = [];
   const changed: ChangedRow[] = [];
   let unchangedCount = 0;
   let riskyCount = 0;
@@ -148,22 +185,27 @@ export function diffTables(
   newByKey.forEach((newRow, key) => {
     const oldRow = oldByKey.get(key);
     if (!oldRow) {
-      added.push(newRow);
+      added.push({ rowNumber: newRow.rowNumber, values: newRow.values });
       return;
     }
     const changes: CellChange[] = [];
     // 複数列を同時に(1行の中で全列まとめて)比較する
     compareColumns.forEach((col) => {
-      const before = oldRow[col] ?? "";
-      const after = newRow[col] ?? "";
+      const before = oldRow.values[col] ?? "";
+      const after = newRow.values[col] ?? "";
       if (before !== after) {
         const risky = isRiskyChange(before, after);
         if (risky) riskyCount += 1;
-        changes.push({ column: col, before, after, risky });
+        changes.push({ column: col, columnLetter: letterOf(newTable, col), before, after, risky });
       }
     });
     if (changes.length > 0) {
-      changed.push({ keyLabel: keyLabelOf(newRow, keyColumns), changes });
+      changed.push({
+        keyLabel: keyLabelOf(newRow.values, keyColumns),
+        oldRowNumber: oldRow.rowNumber,
+        newRowNumber: newRow.rowNumber,
+        changes,
+      });
     } else {
       unchangedCount += 1;
     }
@@ -171,7 +213,7 @@ export function diffTables(
 
   oldByKey.forEach((oldRow, key) => {
     if (!newByKey.has(key)) {
-      removed.push(oldRow);
+      removed.push({ rowNumber: oldRow.rowNumber, values: oldRow.values });
     }
   });
 
@@ -208,12 +250,15 @@ export function buildDiffWorkbook(result: DiffResult): Blob {
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summary), "サマリー");
 
   const changedRows = [
-    [keyLabel, "変更項目数", "列", "変更前", "変更後", "要確認"],
+    [keyLabel, "旧の行", "新の行", "変更項目数", "列", "セル(新)", "変更前", "変更後", "要確認"],
     ...result.changed.flatMap((row) =>
       row.changes.map((c, i) => [
         i === 0 ? row.keyLabel : "",
+        i === 0 ? row.oldRowNumber : "",
+        i === 0 ? row.newRowNumber : "",
         i === 0 ? row.changes.length : "",
         c.column,
+        `${c.columnLetter}${row.newRowNumber}`,
         c.before,
         c.after,
         c.risky ? "⚠" : "",
@@ -222,12 +267,18 @@ export function buildDiffWorkbook(result: DiffResult): Blob {
   ];
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(changedRows), "変更");
 
-  const addedHeaders = result.added[0] ? Object.keys(result.added[0]) : result.keyColumns;
-  const addedSheetData = [addedHeaders, ...result.added.map((r) => addedHeaders.map((h) => r[h] ?? ""))];
+  const addedHeaders = result.added[0] ? Object.keys(result.added[0].values) : result.keyColumns;
+  const addedSheetData = [
+    ["行", ...addedHeaders],
+    ...result.added.map((r) => [r.rowNumber, ...addedHeaders.map((h) => r.values[h] ?? "")]),
+  ];
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(addedSheetData), "追加");
 
-  const removedHeaders = result.removed[0] ? Object.keys(result.removed[0]) : result.keyColumns;
-  const removedSheetData = [removedHeaders, ...result.removed.map((r) => removedHeaders.map((h) => r[h] ?? ""))];
+  const removedHeaders = result.removed[0] ? Object.keys(result.removed[0].values) : result.keyColumns;
+  const removedSheetData = [
+    ["行", ...removedHeaders],
+    ...result.removed.map((r) => [r.rowNumber, ...removedHeaders.map((h) => r.values[h] ?? "")]),
+  ];
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(removedSheetData), "削除");
 
   const out = XLSX.write(wb, { bookType: "xlsx", type: "array" });
