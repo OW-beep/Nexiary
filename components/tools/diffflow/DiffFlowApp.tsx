@@ -1,7 +1,19 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { AlertTriangle, Download, Minus, Plus, RotateCcw, Pencil, ArrowRightLeft } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  AlertTriangle,
+  Download,
+  Minus,
+  Plus,
+  RotateCcw,
+  Pencil,
+  ArrowRightLeft,
+  BookmarkPlus,
+  Trash2,
+  ListChecks,
+  History,
+} from "lucide-react";
 import FileDropZone from "./FileDropZone";
 import {
   loadWorkbook,
@@ -12,12 +24,18 @@ import {
   unionColumns,
   buildDiffWorkbook,
   getFreeRowLimit,
+  getFreeColumnLimit,
+  getFreeColumnLimitLabel,
   type LoadedWorkbook,
   type ParsedTable,
   type DiffResult,
 } from "@/lib/diffflow/engine";
+import { loadRules, saveRule, deleteRule, touchRule, type SavedRule } from "@/lib/diffflow/rules";
+import { loadHistory, addHistoryEntry, clearHistory, type HistoryEntry } from "@/lib/diffflow/history";
 
 const FREE_ROW_LIMIT = getFreeRowLimit();
+const FREE_COLUMN_LIMIT = getFreeColumnLimit();
+const FREE_COLUMN_LIMIT_LABEL = getFreeColumnLimitLabel();
 
 type Step = "upload" | "configure" | "result";
 
@@ -35,6 +53,18 @@ export default function DiffFlowApp() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  const [savedRules, setSavedRules] = useState<SavedRule[]>([]);
+  const [pendingRule, setPendingRule] = useState<SavedRule | null>(null);
+  const [appliedRuleName, setAppliedRuleName] = useState<string | null>(null);
+  const [showSaveForm, setShowSaveForm] = useState(false);
+  const [ruleNameInput, setRuleNameInput] = useState("");
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+
+  useEffect(() => {
+    setSavedRules(loadRules());
+    setHistory(loadHistory());
+  }, []);
+
   const step: Step = result ? "result" : oldTable && newTable ? "configure" : "upload";
 
   const headerDiff = useMemo(() => {
@@ -48,11 +78,61 @@ export default function DiffFlowApp() {
     return unionColumns(oldTable, newTable);
   }, [oldTable, newTable]);
 
+  // 保存済みルールを適用中で、両ファイルが読み込まれたら比較条件を自動反映する
+  useEffect(() => {
+    if (!pendingRule || !oldTable || !newTable) return;
+    const validKeys = pendingRule.keyColumns.filter((k) => sharedHeaders.includes(k));
+    if (validKeys.length > 0) {
+      setKeyColumns(validKeys);
+      setIgnoreColumns(pendingRule.ignoreColumns.filter((c) => allHeaders.includes(c)));
+      setAppliedRuleName(pendingRule.name);
+    }
+    setPendingRule(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingRule, oldTable, newTable]);
+
+  function applyRule(rule: SavedRule) {
+    setPendingRule(rule);
+    setAppliedRuleName(null);
+    setSavedRules(touchRule(rule.id));
+  }
+
+  function removeRule(id: string) {
+    setSavedRules(deleteRule(id));
+  }
+
+  function openSaveForm() {
+    setRuleNameInput(appliedRuleName ?? "");
+    setShowSaveForm(true);
+  }
+
+  function confirmSaveRule() {
+    if (!ruleNameInput.trim() || !oldLoaded || !newLoaded || !oldSheet || !newSheet) return;
+    const next = saveRule({
+      name: ruleNameInput.trim(),
+      keyColumns,
+      ignoreColumns,
+      oldFileName: oldLoaded.fileName,
+      newFileName: newLoaded.fileName,
+      oldSheetName: oldSheet,
+      newSheetName: newSheet,
+    });
+    setSavedRules(next);
+    setShowSaveForm(false);
+    setAppliedRuleName(ruleNameInput.trim());
+  }
+
   function tryApplyTable(which: "old" | "new", loaded: LoadedWorkbook, sheetName: string) {
     const table = parseSheet(loaded, sheetName);
     if (table.rows.length > FREE_ROW_LIMIT) {
       setError(
         `無料版は1ファイルあたり${FREE_ROW_LIMIT.toLocaleString()}行までです。「${loaded.fileName}」(${sheetName})は${table.rows.length.toLocaleString()}行あります。`
+      );
+      return;
+    }
+    if (table.columns.length > FREE_COLUMN_LIMIT) {
+      setError(
+        `無料版は${FREE_COLUMN_LIMIT_LABEL}列までです。「${loaded.fileName}」(${sheetName})は${table.columns.length.toLocaleString()}列(${table.columns[table.columns.length - 1].letter}列まで)あります。`
       );
       return;
     }
@@ -65,8 +145,11 @@ export default function DiffFlowApp() {
       setNewTable(table);
     }
     setResult(null);
-    setKeyColumns([]);
-    setIgnoreColumns([]);
+    if (!pendingRule) {
+      setKeyColumns([]);
+      setIgnoreColumns([]);
+      setAppliedRuleName(null);
+    }
   }
 
   async function handleFile(which: "old" | "new", file: File) {
@@ -94,15 +177,33 @@ export default function DiffFlowApp() {
   function toggleKeyColumn(h: string) {
     setKeyColumns((prev) => (prev.includes(h) ? prev.filter((c) => c !== h) : [...prev, h]));
     setIgnoreColumns((prev) => prev.filter((c) => c !== h));
+    setAppliedRuleName(null);
   }
 
   function runCompare() {
-    if (!oldTable || !newTable || keyColumns.length === 0) return;
+    if (!oldTable || !newTable || keyColumns.length === 0 || !oldLoaded || !newLoaded || !oldSheet || !newSheet) return;
     setBusy(true);
     // 大きめのファイルでもUIが固まって見えないよう1フレーム逃がす
     setTimeout(() => {
       const diff = diffTables(oldTable, newTable, keyColumns, ignoreColumns);
       setResult(diff);
+      setHistory(
+        addHistoryEntry({
+          ruleName: appliedRuleName,
+          keyColumns: diff.keyColumns,
+          oldFileName: oldLoaded.fileName,
+          newFileName: newLoaded.fileName,
+          oldSheetName: oldSheet,
+          newSheetName: newSheet,
+          totalOld: diff.totalOld,
+          totalNew: diff.totalNew,
+          added: diff.added.length,
+          removed: diff.removed.length,
+          changed: diff.changed.length,
+          unchangedCount: diff.unchangedCount,
+          riskyCount: diff.riskyCount,
+        })
+      );
       setBusy(false);
     }, 30);
   }
@@ -129,10 +230,103 @@ export default function DiffFlowApp() {
     setIgnoreColumns([]);
     setResult(null);
     setError(null);
+    setPendingRule(null);
+    setAppliedRuleName(null);
+    setShowSaveForm(false);
   }
 
   return (
     <div className="space-y-8">
+      {/* 保存済みルール一覧 */}
+      {savedRules.length > 0 && step === "upload" && (
+        <div className="catalog-card space-y-3 p-5">
+          <span className="index-tab">
+            <ListChecks size={11} className="mr-1 inline" />
+            保存済みルール
+          </span>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {[...savedRules]
+              .sort((a, b) => b.lastUsedAt - a.lastUsedAt)
+              .map((rule) => (
+                <div
+                  key={rule.id}
+                  className="flex items-start justify-between gap-2 rounded-card border border-line/70 p-3 transition-colors hover:border-ink-soft"
+                >
+                  <button type="button" onClick={() => applyRule(rule)} className="min-w-0 flex-1 text-left">
+                    <p className="truncate font-body text-sm text-ink">{rule.name}</p>
+                    <p className="mt-0.5 truncate font-mono text-[11px] text-ink-soft">
+                      キー: {rule.keyColumns.join(" / ")}
+                    </p>
+                    <p className="mt-0.5 truncate font-mono text-[11px] text-ink-soft/70">
+                      旧: {rule.oldFileName} ／ 新: {rule.newFileName}
+                    </p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeRule(rule.id)}
+                    aria-label="ルールを削除"
+                    className="shrink-0 p-1 text-ink-soft/50 transition-colors hover:text-stamp"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* 比較履歴 */}
+      {history.length > 0 && step === "upload" && (
+        <div className="catalog-card space-y-3 p-5">
+          <div className="flex items-center justify-between">
+            <span className="index-tab">
+              <History size={11} className="mr-1 inline" />
+              比較履歴
+            </span>
+            <button
+              type="button"
+              onClick={() => setHistory(clearHistory())}
+              className="font-mono text-[11px] text-ink-soft/70 underline hover:text-stamp"
+            >
+              すべて削除
+            </button>
+          </div>
+          <ul className="space-y-2">
+            {history.slice(0, 10).map((h) => (
+              <li key={h.id} className="rounded-card border border-line/60 p-3">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                  <p className="font-mono text-xs text-ink">
+                    {formatHistoryDate(h.ranAt)}
+                    <span className="ml-2 text-ink-soft">{h.ruleName ?? "手動比較"}</span>
+                  </p>
+                  <p className="font-mono text-[11px] text-ink-soft">
+                    追加{h.added} ／ 削除{h.removed} ／ 変更{h.changed}
+                    {h.riskyCount > 0 && <span className="ml-1 text-stamp">／ 要確認{h.riskyCount}</span>}
+                  </p>
+                </div>
+                <p className="mt-1 truncate font-mono text-[11px] text-ink-soft/70">
+                  旧: {h.oldFileName} ／ 新: {h.newFileName}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {pendingRule && (
+        <p className="rounded-card border border-line/70 bg-paper-card p-3 font-body text-sm text-ink-soft">
+          「{pendingRule.name}」を適用中です。旧ファイルに「{pendingRule.oldFileName}」、新ファイルに「
+          {pendingRule.newFileName}」を選んでください。
+          <button
+            type="button"
+            onClick={() => setPendingRule(null)}
+            className="ml-2 font-mono text-xs text-ink-soft underline hover:text-stamp"
+          >
+            適用を取り消す
+          </button>
+        </p>
+      )}
+
       {/* Step 1: ファイル投入(シート選択含む) */}
       <div className="grid gap-4 sm:grid-cols-2">
         <FileDropZone
@@ -204,6 +398,11 @@ export default function DiffFlowApp() {
       {/* Step 2: 比較条件 */}
       {step !== "upload" && oldTable && newTable && (
         <div className="catalog-card space-y-5 p-5">
+          {appliedRuleName && (
+            <p className="rounded-card border border-moss/40 bg-moss-light px-3 py-2 font-body text-xs text-moss">
+              「{appliedRuleName}」の条件を適用しました。
+            </p>
+          )}
           <div>
             <span className="index-tab">比較キー(複数選択可)</span>
             <p className="mt-2 font-body text-xs text-ink-soft">
@@ -273,6 +472,15 @@ export default function DiffFlowApp() {
             >
               {busy ? "比較中…" : "比較する"}
             </button>
+            {keyColumns.length > 0 && !showSaveForm && (
+              <button
+                type="button"
+                onClick={openSaveForm}
+                className="flex items-center gap-1 font-body text-sm text-ink-soft hover:text-ink"
+              >
+                <BookmarkPlus size={14} /> ルールとして保存
+              </button>
+            )}
             <button
               type="button"
               onClick={reset}
@@ -281,6 +489,33 @@ export default function DiffFlowApp() {
               <RotateCcw size={14} /> やり直す
             </button>
           </div>
+
+          {showSaveForm && (
+            <div className="flex flex-wrap items-center gap-2 rounded-card border border-line/70 p-3">
+              <input
+                type="text"
+                value={ruleNameInput}
+                onChange={(e) => setRuleNameInput(e.target.value)}
+                placeholder="ルール名(例：毎月顧客マスタ比較)"
+                className="min-w-[200px] flex-1 rounded-card border border-line bg-paper-card px-3 py-1.5 font-body text-sm text-ink focus:border-stamp focus:outline-none"
+              />
+              <button
+                type="button"
+                disabled={!ruleNameInput.trim()}
+                onClick={confirmSaveRule}
+                className="rounded-card bg-ink px-4 py-1.5 font-body text-sm text-paper transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                保存
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowSaveForm(false)}
+                className="font-body text-sm text-ink-soft hover:text-stamp"
+              >
+                キャンセル
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -374,7 +609,7 @@ export default function DiffFlowApp() {
       )}
 
       <p className="font-mono text-[11px] text-ink-soft/70">
-        無料版は1ファイル{FREE_ROW_LIMIT.toLocaleString()}行まで。ファイルはサーバーに送信されず、すべてこのブラウザ内で処理されます。
+        無料版は1ファイル{FREE_ROW_LIMIT.toLocaleString()}行・{FREE_COLUMN_LIMIT_LABEL}列まで。ファイルはサーバーに送信されず、すべてこのブラウザ内で処理されます。
       </p>
     </div>
   );
@@ -417,6 +652,16 @@ function ResultTable({ title, children }: { title: string; children: React.React
       <div className="mt-3 overflow-x-auto">{children}</div>
     </div>
   );
+}
+
+function formatHistoryDate(ts: number): string {
+  return new Date(ts).toLocaleString("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function SimpleRowList({

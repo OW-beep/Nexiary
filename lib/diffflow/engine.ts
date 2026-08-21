@@ -60,11 +60,30 @@ export type DiffResult = {
   riskyCount: number;
 };
 
-const FREE_ROW_LIMIT = 5000;
+const FREE_ROW_LIMIT = 1000;
+const FREE_COLUMN_LIMIT = 702; // A〜ZZ列まで(26 + 26*26)
+const PRO_ROW_LIMIT = 100000;
+const PRO_COLUMN_LIMIT = 16384; // Excelの最大列(XFD)まで
 const KEY_SEPARATOR = "␟";
 
 export function getFreeRowLimit() {
   return FREE_ROW_LIMIT;
+}
+
+export function getFreeColumnLimit() {
+  return FREE_COLUMN_LIMIT;
+}
+
+export function getFreeColumnLimitLabel() {
+  return XLSX.utils.encode_col(FREE_COLUMN_LIMIT - 1); // "ZZ"
+}
+
+export function getProRowLimit() {
+  return PRO_ROW_LIMIT;
+}
+
+export function getProColumnLimit() {
+  return PRO_COLUMN_LIMIT;
 }
 
 /** ファイル(.xlsx/.xls/.csv)を読み込み、シート名一覧を取得する(まだ行データには変換しない) */
