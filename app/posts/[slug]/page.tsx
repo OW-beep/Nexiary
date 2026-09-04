@@ -74,7 +74,6 @@ import MaintenanceCycleDiagram from "@/components/mdx/MaintenanceCycleDiagram";
 import LanternGlowDiagram from "@/components/mdx/LanternGlowDiagram";
 import SolarOutputWeatherDiagram from "@/components/mdx/SolarOutputWeatherDiagram";
 import DisasterKitCategoryGrid from "@/components/mdx/DisasterKitCategoryGrid";
-import RadarCompare from "@/components/mdx/RadarCompare";
 import { siteConfig } from "@/lib/site-config";
 import { getAllPosts, getPostBySlug, getRelatedPosts } from "@/lib/posts";
 
@@ -83,7 +82,6 @@ const mdxComponents = {
   RankingList,
   AncWaveDiagram,
   SpecBarChart,
-  RadarCompare,
   PenTabletDiagram,
   ResponseTimeDiagram,
   BackupRuleDiagram,

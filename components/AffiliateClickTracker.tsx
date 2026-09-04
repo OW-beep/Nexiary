@@ -24,13 +24,24 @@ export default function AffiliateClickTracker() {
         href.includes("a8.net") ||
         href.includes("rakuten.co.jp") ||
         href.includes("hb.afl.rakuten.co.jp") ||
+        href.includes("amazon.co.jp") ||
+        href.includes("amzn.to") ||
         rel.includes("sponsored");
       if (!isAffiliate || !window.gtag) return;
+
+      const provider = href.includes("amazon.co.jp") || href.includes("amzn.to")
+        ? "amazon"
+        : href.includes("rakuten.co.jp")
+          ? "rakuten"
+          : href.includes("a8.net")
+            ? "a8"
+            : "other";
 
       window.gtag("event", "affiliate_click", {
         link_url: href,
         page_path: window.location.pathname,
         link_text: target.textContent?.trim().slice(0, 60) || "",
+        provider,
       });
     };
 
