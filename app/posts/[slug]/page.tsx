@@ -67,6 +67,7 @@ import KnuckleStrapDiagram from "@/components/mdx/KnuckleStrapDiagram";
 import MatCurlFlattenDiagram from "@/components/mdx/MatCurlFlattenDiagram";
 import SlimWatchProfileDiagram from "@/components/mdx/SlimWatchProfileDiagram";
 import CaffeineFormComparisonDiagram from "@/components/mdx/CaffeineFormComparisonDiagram";
+import AlphaRiceCookTimeDiagram from "@/components/mdx/AlphaRiceCookTimeDiagram";
 import MultiFunctionClusterDiagram from "@/components/mdx/MultiFunctionClusterDiagram";
 import FaceCushionMaterialDiagram from "@/components/mdx/FaceCushionMaterialDiagram";
 import VoiceCommandBubbles from "@/components/mdx/VoiceCommandBubbles";
@@ -144,6 +145,7 @@ const mdxComponents = {
   MatCurlFlattenDiagram,
   SlimWatchProfileDiagram,
   CaffeineFormComparisonDiagram,
+  AlphaRiceCookTimeDiagram,
 };
 
 export function generateStaticParams() {
