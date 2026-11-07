@@ -12,6 +12,7 @@ import FaqSection from "@/components/FaqSection";
 import NexiaryScoreCard from "@/components/NexiaryScoreCard";
 import AuthorBio from "@/components/AuthorBio";
 import RankingList from "@/components/mdx/RankingList";
+import RadarCompare from "@/components/mdx/RadarCompare";
 import AncWaveDiagram from "@/components/mdx/AncWaveDiagram";
 import SpecBarChart from "@/components/mdx/SpecBarChart";
 import PenTabletDiagram from "@/components/mdx/PenTabletDiagram";
@@ -82,6 +83,7 @@ import { getAllPosts, getPostBySlug, getRelatedPosts } from "@/lib/posts";
 const mdxComponents = {
   AffiliateCard,
   RankingList,
+  RadarCompare,
   AncWaveDiagram,
   SpecBarChart,
   PenTabletDiagram,
