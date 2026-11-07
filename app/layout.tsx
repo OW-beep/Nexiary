@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { Newsreader, Inter, IBM_Plex_Mono } from "next/font/google";
+import { Inter, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -8,12 +8,8 @@ import AffiliateClickTracker from "@/components/AffiliateClickTracker";
 import RakutenCorner from "@/components/RakutenCorner";
 import { siteConfig } from "@/lib/site-config";
 
-// display: 見出し用セリフ（日記/目録のクラシックな雰囲気）
-const display = Newsreader({
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-display",
-});
+// display: 見出し用セリフ。Google Fontsの取得に失敗してビルドが落ちることがあったため、
+// next/fontは使わず globals.css の --font-display（システムのセリフ体）を使う。
 // body: 本文用サンセリフ
 const body = Inter({
   subsets: ["latin"],
@@ -83,7 +79,7 @@ export default function RootLayout({
   ];
 
   return (
-    <html lang="ja" className={`${display.variable} ${body.variable} ${mono.variable}`}>
+    <html lang="ja" className={`${body.variable} ${mono.variable}`}>
       <body className="flex min-h-screen flex-col">
         <script
           type="application/ld+json"
