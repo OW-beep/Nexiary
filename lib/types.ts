@@ -3,7 +3,8 @@ import type { Category } from "./site-config";
 export interface PostFrontmatter {
   title: string;
   description: string;
-  date: string; // "2026-07-16" 形式
+  date: string; // "2026-07-16" 形式（公開日）
+  updated?: string; // "2026-11-07" 形式。大きく加筆・修正したときだけ設定（記事に「更新日」を表示し、sitemap/構造化データにも反映）
   category: Category;
   tags: string[];
   cover?: string;

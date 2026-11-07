@@ -161,10 +161,17 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
     alternates: { canonical: `/posts/${post.slug}` },
     openGraph: {
       type: "article",
+      url: `/posts/${post.slug}`,
       title: post.frontmatter.title,
       description: post.frontmatter.description,
       publishedTime: post.frontmatter.date,
+      modifiedTime: post.frontmatter.updated ?? post.frontmatter.date,
       images: post.frontmatter.cover ? [post.frontmatter.cover] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.frontmatter.title,
+      description: post.frontmatter.description,
     },
   };
 }
@@ -178,13 +185,23 @@ export default function PostPage({ params }: { params: { slug: string } }) {
     post.frontmatter.category;
   const related = getRelatedPosts(post);
 
+  // 検索から来た読者は「結論の1台」まで長い記事を読み進めないことが多い。
+  // 記事内で最初に出てくるアフィリエイトカードにアンカー(#pick)を付け、冒頭からジャンプできるようにする。
+  const hasPick = post.content.includes("<AffiliateCard");
+  const articleSource = hasPick
+    ? post.content.replace("<AffiliateCard", '<AffiliateCard id="pick"')
+    : post.content;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: post.frontmatter.title,
     description: post.frontmatter.description,
     datePublished: post.frontmatter.date,
+    dateModified: post.frontmatter.updated ?? post.frontmatter.date,
+    mainEntityOfPage: `${siteConfig.url}/posts/${post.slug}`,
     author: { "@type": "Organization", name: siteConfig.name },
+    publisher: { "@type": "Organization", name: siteConfig.name },
   };
 
   const breadcrumbJsonLd = {
@@ -277,6 +294,11 @@ export default function PostPage({ params }: { params: { slug: string } }) {
         </h1>
         <div className="mt-3 flex flex-wrap items-center gap-3 font-mono text-xs text-ink-soft">
           <time dateTime={post.frontmatter.date}>{post.frontmatter.date}</time>
+          {post.frontmatter.updated && post.frontmatter.updated !== post.frontmatter.date && (
+            <span>
+              更新: <time dateTime={post.frontmatter.updated}>{post.frontmatter.updated}</time>
+            </span>
+          )}
           <div className="flex gap-2">
             {post.frontmatter.tags?.map((t) => (
               <a key={t} href={`/tag/${encodeURIComponent(t)}`} className="hover:text-stamp">
@@ -290,13 +312,22 @@ export default function PostPage({ params }: { params: { slug: string } }) {
           <ReadingPulse slug={post.slug} />
         </div>
 
+        {hasPick && (
+          <a
+            href="#pick"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-card border border-stamp/40 bg-stamp/5 px-3.5 py-2 font-body text-xs text-stamp transition-colors hover:bg-stamp/10 sm:text-sm"
+          >
+            紹介している商品を先に見る ↓
+          </a>
+        )}
+
         {post.frontmatter.nexiaryScore && (
           <NexiaryScoreCard score={post.frontmatter.nexiaryScore} />
         )}
 
         <div className="prose prose-neutral mt-8 max-w-none prose-headings:font-display prose-headings:text-ink prose-a:text-stamp prose-img:rounded-card">
           <MDXRemote
-            source={post.content}
+            source={articleSource}
             components={mdxComponents}
             options={{
               // content/posts配下は自分で書いた記事のみを置く前提（第三者の投稿は受け付けない）。
@@ -307,7 +338,7 @@ export default function PostPage({ params }: { params: { slug: string } }) {
           />
         </div>
 
-        <AdSlot slot="1234567890" />
+        <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_ARTICLE ?? ""} />
         <AuthorBio />
       </article>
 

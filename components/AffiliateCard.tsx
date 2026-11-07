@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 
 interface AffiliateCardProps {
+  id?: string; // ページ内リンク（記事冒頭の「おすすめを先に見る」）用のアンカー
   name: string;
   description: string;
   href: string; // ASPの発行するアフィリエイトリンク（楽天等）
@@ -18,6 +19,7 @@ interface AffiliateCardProps {
 // hrefのCTAは視認性の高い赤系（stamp色）の塗りボタン、amazonHrefのCTAは輪郭のみのセカンダリボタンにして、
 // 「主導線（楽天）＋もう一つの選択肢（Amazon）」という優先順位を視覚的に示す。
 export default function AffiliateCard({
+  id,
   name,
   description,
   href,
@@ -29,7 +31,10 @@ export default function AffiliateCard({
   badge,
 }: AffiliateCardProps) {
   return (
-    <div className="catalog-card not-prose my-6 flex flex-col gap-4 p-5 sm:flex-row sm:items-center">
+    <div
+      id={id}
+      className="catalog-card not-prose my-6 flex scroll-mt-24 flex-col gap-4 p-5 sm:flex-row sm:items-center"
+    >
       {image && (
         <Link
           href={href}

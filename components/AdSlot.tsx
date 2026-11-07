@@ -2,7 +2,8 @@
 // 審査前・未設定時は何も描画しない（空枠でレイアウト崩れを起こさないようにするため）
 export default function AdSlot({ slot, format = "auto" }: { slot: string; format?: string }) {
   const client = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
-  if (!client) return null;
+  // クライアントIDか広告ユニットIDのどちらかが未設定なら何も出さない（ダミーIDで配信して無効リクエストになるのを防ぐ）
+  if (!client || !slot) return null;
 
   return (
     <div className="not-prose my-8 flex justify-center">

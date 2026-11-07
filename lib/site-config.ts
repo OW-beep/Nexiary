@@ -3,8 +3,9 @@ export const siteConfig = {
   tagline: "毎日、新しい発見に出会う。",
   description:
     "AI・ゲーム・ガジェット・Webサービスの最新情報を、目録のように整理してお届けするメディア「Nexiary」。",
-  // 本番ドメインが決まり次第ここを更新（メタデータのcanonical/OGPに反映される）
-  url: "https://nexiary-phi.vercel.app",
+  // 独自ドメインに移行したら、Vercelの環境変数 NEXT_PUBLIC_SITE_URL にそのURLを入れるだけで
+  // canonical/OGP/サイトマップ/構造化データのすべてに反映される（末尾スラッシュなし）。
+  url: (process.env.NEXT_PUBLIC_SITE_URL || "https://nexiary-phi.vercel.app").replace(/\/$/, ""),
   locale: "ja_JP",
   twitterHandle: "@nexiary_media",
   categories: [

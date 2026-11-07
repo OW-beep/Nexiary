@@ -16,6 +16,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   if (!category) return {};
   return {
     title: `${category.label}の記事一覧`,
+    description: `${siteConfig.name}の「${category.label}」カテゴリの記事一覧です。実際に使ってみたレビュー、選び方、使い方のガイドを新着順にまとめています。`,
     alternates: { canonical: `/category/${category.slug}` },
   };
 }

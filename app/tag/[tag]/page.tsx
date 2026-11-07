@@ -13,6 +13,7 @@ export function generateMetadata({ params }: { params: { tag: string } }): Metad
   const tag = decodeURIComponent(params.tag);
   return {
     title: `「${tag}」の記事一覧`,
+    description: `「${tag}」に関するNexiaryの記事一覧です。実際に使ってみたレビューや選び方のガイドをまとめています。`,
     alternates: { canonical: `/tag/${params.tag}` },
   };
 }
