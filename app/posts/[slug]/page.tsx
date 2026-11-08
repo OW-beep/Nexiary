@@ -158,7 +158,8 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   const post = getPostBySlug(params.slug);
   if (!post) return {};
   return {
-    title: post.frontmatter.title,
+    // 検索結果ではタイトルが約30字で切れるため、末尾に「｜Nexiary」を足さず、検索語を含む記事タイトルをそのまま使う
+    title: { absolute: post.frontmatter.title },
     description: post.frontmatter.description,
     alternates: { canonical: `/posts/${post.slug}` },
     openGraph: {

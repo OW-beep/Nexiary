@@ -25,7 +25,7 @@ const mono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.name}｜${siteConfig.tagline}`,
+    default: `${siteConfig.name}｜ガジェット・Webサービスのレビューと使い方ガイド`,
     template: `%s｜${siteConfig.name}`,
   },
   description: siteConfig.description,
