@@ -19,7 +19,11 @@ export default function PostCard({ post }: { post: Post }) {
         {post.frontmatter.description}
       </p>
       <div className="mt-4 flex items-center justify-between">
-        <p className="font-mono text-xs text-ink-soft/70">{post.frontmatter.date}</p>
+        <p className="font-mono text-xs text-ink-soft/70">
+          {post.frontmatter.updated && post.frontmatter.updated > post.frontmatter.date
+            ? `更新 ${post.frontmatter.updated}`
+            : post.frontmatter.date}
+        </p>
         {post.frontmatter.tags?.[0] && (
           <Link
             href={`/tag/${encodeURIComponent(post.frontmatter.tags[0])}`}

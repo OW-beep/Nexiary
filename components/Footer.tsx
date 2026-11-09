@@ -32,7 +32,10 @@ export default function Footer() {
               </Link>
             ))}
           </nav>
-          <p className="mt-4 font-mono text-xs text-paper/50">
+          <p className="mt-4 max-w-sm font-body text-xs text-paper/60 sm:text-right">
+            Amazonのアソシエイトとして、{siteConfig.name}は適格販売により収入を得ています。
+          </p>
+          <p className="mt-2 font-mono text-xs text-paper/50">
             © {new Date().getFullYear()} {siteConfig.name}. All rights reserved.
           </p>
         </div>

@@ -9,6 +9,13 @@ import { getAllPosts } from "@/lib/posts";
 export default function HomePage() {
   const allPosts = getAllPosts();
   const latest = allPosts.slice(0, 6);
+  // 公開後に加筆・修正した記事。再訪した読者に「更新されている」ことが伝わるよう、最近更新した順に表示する
+  const recentlyUpdated = allPosts
+    .filter((p) => p.frontmatter.updated && p.frontmatter.updated > p.frontmatter.date)
+    .sort((a, b) =>
+      (b.frontmatter.updated as string).localeCompare(a.frontmatter.updated as string)
+    )
+    .slice(0, 3);
   const drawablePosts = allPosts.map((p) => ({
     slug: p.slug,
     title: p.frontmatter.title,
@@ -140,6 +147,22 @@ export default function HomePage() {
           )}
         </Container>
       </section>
+
+      {recentlyUpdated.length > 0 && (
+        <section className="border-t border-line bg-paper-card">
+          <Container className="py-14">
+            <h2 className="font-display text-2xl text-ink">最近更新した記事</h2>
+            <p className="mt-2 font-body text-sm text-ink-soft">
+              情報を見直して、内容を書き足した記事です。
+            </p>
+            <ul className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {recentlyUpdated.map((post) => (
+                <PostCard key={post.slug} post={post} />
+              ))}
+            </ul>
+          </Container>
+        </section>
+      )}
 
       <section className="border-t border-line">
         <Container className="py-14">
