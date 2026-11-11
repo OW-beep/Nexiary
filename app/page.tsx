@@ -89,7 +89,7 @@ export default function HomePage() {
           <p className="mt-2 font-body text-sm text-ink-soft">
             気になるテーマから、関連記事をまとめて読めます。
           </p>
-          <ul className="mt-6 grid gap-5 sm:grid-cols-3">
+          <ul className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {[
               {
                 slug: "wfh-toolkit-complete-guide",
@@ -105,6 +105,11 @@ export default function HomePage() {
                 slug: "daily-life-small-troubles-guide",
                 title: "暮らしの小さな悩みを解決するアイテムまとめ",
                 desc: "紛失・データ消失・収納不足の解決策",
+              },
+              {
+                slug: "nexiary-picks-2026",
+                title: "Nexiaryで紹介したガジェット・生活用品まとめ",
+                desc: "防災・デスク・暮らし・ゲーム別に一覧",
               },
             ].map((g) => (
               <li key={g.slug} className="catalog-card p-5">

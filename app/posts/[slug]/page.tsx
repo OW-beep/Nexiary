@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import Container from "@/components/Container";
@@ -79,6 +80,7 @@ import SolarOutputWeatherDiagram from "@/components/mdx/SolarOutputWeatherDiagra
 import DisasterKitCategoryGrid from "@/components/mdx/DisasterKitCategoryGrid";
 import { siteConfig } from "@/lib/site-config";
 import { getAllPosts, getPostBySlug, getRelatedPosts } from "@/lib/posts";
+import { getEnglishPostByJaSlug } from "@/lib/posts-en";
 
 const mdxComponents = {
   AffiliateCard,
@@ -161,7 +163,18 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
     // 検索結果ではタイトルが約30字で切れるため、末尾に「｜Nexiary」を足さず、検索語を含む記事タイトルをそのまま使う
     title: { absolute: post.frontmatter.title },
     description: post.frontmatter.description,
-    alternates: { canonical: `/posts/${post.slug}` },
+    alternates: {
+      canonical: `/posts/${post.slug}`,
+      // 英語版がある記事は、相互にhreflangを張る（検索エンジンに言語違いの同内容ページと伝える）
+      ...(getEnglishPostByJaSlug(post.slug)
+        ? {
+            languages: {
+              ja: `/posts/${post.slug}`,
+              en: `/en/posts/${getEnglishPostByJaSlug(post.slug)!.slug}`,
+            },
+          }
+        : {}),
+    },
     openGraph: {
       type: "article",
       url: `/posts/${post.slug}`,
@@ -314,6 +327,17 @@ export default function PostPage({ params }: { params: { slug: string } }) {
         <div className="mt-3">
           <ReadingPulse slug={post.slug} />
         </div>
+
+        {getEnglishPostByJaSlug(post.slug) && (
+          <p className="mt-3 font-body text-sm">
+            <Link
+              href={`/en/posts/${getEnglishPostByJaSlug(post.slug)!.slug}`}
+              className="text-stamp hover:underline"
+            >
+              Read in English →
+            </Link>
+          </p>
+        )}
 
         {hasPick && (
           <a

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { siteConfig } from "@/lib/site-config";
 import { getAllPosts, getAllTags } from "@/lib/posts";
+import { getAllEnglishPosts } from "@/lib/posts-en";
 
 // lastModified は「実際に内容が変わった日」だけを返す。
 // ビルドのたびに new Date() を入れると、全URLが毎回「更新された」ことになり、
@@ -49,5 +50,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: toDate(modifiedOf(post)),
   }));
 
-  return [...staticPages, ...categoryPages, ...tagPages, ...postPages];
+  const englishPages = [
+    { url: `${siteConfig.url}/en`, lastModified: toDate(latest) },
+    ...getAllEnglishPosts().map((p) => ({
+      url: `${siteConfig.url}/en/posts/${p.slug}`,
+      lastModified: toDate(p.frontmatter.updated ?? p.frontmatter.date),
+    })),
+  ];
+
+  return [...staticPages, ...categoryPages, ...tagPages, ...postPages, ...englishPages];
 }
