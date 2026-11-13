@@ -8,6 +8,7 @@ import { getAllPosts } from "@/lib/posts";
 export const metadata: Metadata = {
   title: "サイト内検索",
   alternates: { canonical: "/search" },
+  robots: { index: false, follow: true },
 };
 
 export default function SearchPage({

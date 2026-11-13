@@ -3,6 +3,7 @@ import Container from "@/components/Container";
 import PostCard from "@/components/PostCard";
 import PopularPosts from "@/components/PopularPosts";
 import RandomCardDraw from "@/components/RandomCardDraw";
+import AdSlot from "@/components/AdSlot";
 import { siteConfig } from "@/lib/site-config";
 import { getAllPosts } from "@/lib/posts";
 
@@ -126,6 +127,88 @@ export default function HomePage() {
         </Container>
       </section>
 
+      
+      {/* 悩みから探す：実際に検索で読まれている「困りごと」導線 */}
+      <section className="border-b border-line">
+        <Container className="py-14">
+          <h2 className="font-display text-2xl text-ink">悩みから探す</h2>
+          <p className="mt-2 font-body text-sm text-ink-soft">
+            検索で一番読まれているのは、新製品ニュースではなく「地味な困りごと」でした。同じ悩みなら、ここから最短で解決できます。
+          </p>
+          <ul className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              { slug: "gaming-controller-guide", title: "コントローラーで親指・手首が痛い", desc: "原因は重さと握り方。負担を減らす選び方と対策" },
+              { slug: "gaming-mouse-sole-replacement-guide", title: "マウスの滑りが悪い・ソールが剥がれる", desc: "買い替え前に。交換のタイミングと貼り替え手順" },
+              { slug: "apple-pencil-nib-replacement-guide", title: "Apple Pencilのペン先を交換したい", desc: "互換ペン先は使える？純正との描き心地の違い" },
+              { slug: "fire-tv-stick-old-tv-guide", title: "古いテレビでFire TV Stickは使える？", desc: "HDRやAtmosが古いテレビでどうなるかまで解説" },
+              { slug: "chatgpt-plus-guide", title: "ChatGPT Plusに課金すべきか迷う", desc: "料金・無料版との違い・Proとの違いを1表で判断" },
+              { slug: "mobile-battery-flight-rules-2026", title: "モバイルバッテリーを飛行機に持ち込める？", desc: "容量ルールと大容量モデルの選び方" },
+            ].map((g) => (
+              <li key={g.slug} className="catalog-card p-5">
+                <span className="index-tab">悩み解決</span>
+                <h3 className="mt-3 font-display text-base leading-snug text-ink">
+                  <Link href={`/posts/${g.slug}`} className="hover:text-stamp">{g.title}</Link>
+                </h3>
+                <p className="mt-2 font-body text-sm text-ink-soft">{g.desc}</p>
+              </li>
+            ))}
+          </ul>
+        </Container>
+      </section>
+
+      {/* 買って失敗しない比較：高単価・購入直前の読者のための収益セクション */}
+      <section className="border-b border-line bg-paper-card">
+        <Container className="py-14">
+          <h2 className="font-display text-2xl text-ink">買って失敗しない比較</h2>
+          <p className="mt-2 font-body text-sm text-ink-soft">
+            高い買い物ほど、買う前の比較で差がつきます。実際に使った比較と、実測データのある記事だけを厳選しました。
+          </p>
+          <ul className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { slug: "portable-power-station-4model-comparison", title: "ポータブル電源 4モデル比較", desc: "防災・車中泊に。実際に4台使って比較" },
+              { slug: "solar-panel-buying-guide", title: "ソーラーパネルの選び方", desc: "100Wと200W、実発電量の目安つき" },
+              { slug: "mouse-sole-comparison-guide", title: "マウスソールおすすめ比較", desc: "厚さ・形状・素材で選ぶ消耗品の正解" },
+              { slug: "apple-pencil-nib-comparison-guide", title: "Apple Pencil ペン先 純正vs互換", desc: "価格・描き心地・寿命で比較" },
+            ].map((g) => (
+              <li key={g.slug} className="catalog-card p-5">
+                <span className="index-tab">比較</span>
+                <h3 className="mt-3 font-display text-base leading-snug text-ink">
+                  <Link href={`/posts/${g.slug}`} className="hover:text-stamp">{g.title}</Link>
+                </h3>
+                <p className="mt-2 font-body text-sm text-ink-soft">{g.desc}</p>
+              </li>
+            ))}
+          </ul>
+        </Container>
+      </section>
+
+      {/* 自社ツール DiffFlow への導線：メディアの読者を継続課金へ */}
+      <section className="border-b border-line bg-paper-card">
+        <Container className="py-14">
+          <div className="grid gap-8 md:grid-cols-[1.2fr_1fr] md:items-center">
+            <div>
+              <span className="index-tab">TOOL / Nexiary製</span>
+              <h2 className="mt-3 font-display text-2xl leading-snug text-ink">毎月のExcel比較、まだ目視していませんか？</h2>
+              <p className="mt-3 max-w-lg font-body text-sm leading-relaxed text-ink-soft">
+                DiffFlowは、新旧2つのExcel・CSVを入れるだけで追加・削除・変更を自動で見つける、Nexiary自社開発のツールです。ファイルはブラウザ内だけで処理され、サーバーに送られません。無料で試せて、Proは月額980円。
+              </p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Link href="/tools/diffflow" className="rounded-card bg-ink px-5 py-2.5 font-body text-sm text-paper hover:opacity-90">無料で試す →</Link>
+                <Link href="/posts/excel-diff-compare-guide" className="rounded-card border border-line bg-paper px-5 py-2.5 font-body text-sm text-ink hover:border-stamp hover:text-stamp">目視チェックをやめる方法を読む</Link>
+              </div>
+            </div>
+            <div className="catalog-card p-6">
+              <p className="font-mono text-[11px] uppercase tracking-widest text-ink-soft">DiffFlow</p>
+              <ul className="mt-4 space-y-2 font-body text-sm text-ink-soft">
+                <li>✓ 追加・削除・変更を自動検出</li>
+                <li>✓ ファイルは外部送信なし（ブラウザ内処理）</li>
+                <li>✓ 無料版あり / Pro 月額980円で大規模ファイル対応</li>
+              </ul>
+            </div>
+          </div>
+        </Container>
+      </section>
+
       {/* 最新の発見一覧 */}
       <section>
         <Container className="py-14">
@@ -152,6 +235,10 @@ export default function HomePage() {
           )}
         </Container>
       </section>
+
+      <Container>
+        <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_HOME ?? ""} />
+      </Container>
 
       {recentlyUpdated.length > 0 && (
         <section className="border-t border-line bg-paper-card">

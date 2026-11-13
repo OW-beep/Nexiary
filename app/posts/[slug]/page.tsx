@@ -352,6 +352,8 @@ export default function PostPage({ params }: { params: { slug: string } }) {
           <NexiaryScoreCard score={post.frontmatter.nexiaryScore} />
         )}
 
+        <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_ARTICLE_TOP ?? ""} />
+
         <div className="prose prose-neutral mt-8 max-w-none prose-headings:font-display prose-headings:text-ink prose-a:text-stamp prose-img:rounded-card">
           <MDXRemote
             source={articleSource}

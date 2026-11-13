@@ -18,7 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     posts[0] ? modifiedOf(posts[0]) : "2026-07-01"
   );
 
-  const staticPages = ["", "/posts", "/category", "/search", "/about", "/contact", "/privacy-policy", "/terms"].map(
+  const staticPages = ["", "/posts", "/category", "/search", "/about", "/contact", "/privacy-policy", "/terms", "/site-map", "/log", "/tools", "/tools/diffflow"].map(
     (path) => ({
       url: `${siteConfig.url}${path}`,
       lastModified: toDate(latest),
@@ -34,7 +34,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
       ),
     }));
 
-  const tagPages = getAllTags().map((tag) => ({
+  const tagPages = getAllTags()
+    .filter((tag) => posts.filter((p) => p.frontmatter.tags?.includes(tag)).length >= 3)
+    .map((tag) => ({
     url: `${siteConfig.url}/tag/${encodeURIComponent(tag)}`,
     lastModified: toDate(
       posts

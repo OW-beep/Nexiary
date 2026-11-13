@@ -1,8 +1,8 @@
 export const siteConfig = {
   name: "Nexiary",
-  tagline: "毎日、新しい発見に出会う。",
+  tagline: "迷う・困るを、3分で解決する。",
   description:
-    "AI・ゲーム・ガジェット・Webサービスの最新情報を、目録のように整理してお届けするメディア「Nexiary」。",
+    "買う前に迷う、使い方が分からない、地味に困る——AI・ゲーム・ガジェット・Webサービスのその悩みを、比較と手順で3分で解決するメディア「Nexiary」。実際に検索で読まれている悩みから逆算して記事を作っています。",
   // 独自ドメインに移行したら、Vercelの環境変数 NEXT_PUBLIC_SITE_URL にそのURLを入れるだけで
   // canonical/OGP/サイトマップ/構造化データのすべてに反映される（末尾スラッシュなし）。
   url: (process.env.NEXT_PUBLIC_SITE_URL || "https://nexiary-phi.vercel.app").replace(/\/$/, ""),

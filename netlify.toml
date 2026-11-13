@@ -1,0 +1,6 @@
+# Netlify（無料・商用可）に移す場合の設定。Vercel運用の間は無視される。
+[build]
+  command = "npm run build"
+  publish = ".next"
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

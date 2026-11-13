@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Container from "@/components/Container";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import UpgradeForm from "@/components/tools/diffflow/UpgradeForm";
+import CancelForm from "@/components/tools/diffflow/CancelForm";
 import { getFreeRowLimit, getFreeColumnLimitLabel, getProRowLimit } from "@/lib/diffflow/engine";
 
 export const metadata: Metadata = {
@@ -41,6 +42,16 @@ export default function DiffFlowUpgradePage() {
 
       <div className="mt-8 max-w-xl">
         <UpgradeForm />
+      </div>
+
+      <div className="mt-14 max-w-xl">
+        <h2 className="font-display text-xl text-ink">Proの解約</h2>
+        <p className="mt-2 font-body text-sm leading-relaxed text-ink-soft">
+          解約はアカウント登録なしで、登録時に発行されたライセンスキーだけで行えます。解約後は次回以降の課金は発生しません。
+        </p>
+        <div className="mt-4">
+          <CancelForm />
+        </div>
       </div>
     </Container>
   );

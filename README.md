@@ -3,6 +3,10 @@
 AI・ゲーム・ガジェット・Webサービスを紹介するアフィリエイトメディア。
 Next.js 14 (App Router) + TypeScript + Tailwind CSS + MDX。
 
+## 改修履歴（2026-11-13）
+- **v5（AdSense版）**：記事上部・トップ中段に広告枠を追加。詳細は `ADSENSE_SETUP.md`。
+- **v6（AdSense通過可能性の最大化）**：通過サイトの共通点調査（`workspace/research_notes/adsense-approval-common-points-20261113-0258/report.md`）に基づき、プライバシーポリシーを公式必須3点に完全対応、運営者情報の追加、HTMLサイトマップ（`/sitemap`）の新設、薄い収益記事3本の加筆を実施。詳細は `ADSENSE_V6.md`。
+
 ## スタック
 - **フレームワーク**: Next.js 14 (App Router)
 - **スタイリング**: Tailwind CSS（デザイントークンは `tailwind.config.ts` に集約）
